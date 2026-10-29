@@ -6,7 +6,7 @@
 #include <gl/glm/glm.hpp>
 #include <gl/glm/gtc/matrix_transform.hpp>
 #include "shader.h"
-
+//시작
 GLuint vao, vbo_pos, vbo_color;
 GLint modelLocation;
 float xAngle = 30.0f;
