@@ -168,6 +168,10 @@ int main()
     glDeleteBuffers(1, &vbo_color);
     glDeleteVertexArrays(1, &vao);
     glDeleteProgram(shaderProgramID);
+    free(sphere.vertices);
+    free(sphere.faces);
+    free(spherePosition);
+    free(sphereColor);
     glfwDestroyWindow(window);
     glfwTerminate();
     return 0;
@@ -229,6 +233,7 @@ void InitBuffer()
 
 void drawScene()
 {
+
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glUseProgram(shaderProgramID);
@@ -241,7 +246,32 @@ void drawScene()
     glm::mat4 modelTransform = projection * Rx * Ry;
     glUniformMatrix4fv(modelLocation, 1, GL_FALSE, &modelTransform[0][0]);
 
+    // 축
+    glBindBuffer(GL_ARRAY_BUFFER, vbo_pos);
+    glBufferData(GL_ARRAY_BUFFER,
+        sizeof(axisPosition), axisPosition, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vbo_color);
+    glBufferData(GL_ARRAY_BUFFER,
+        sizeof(axisColor), axisColor, GL_STATIC_DRAW);
+
     glDrawArrays(GL_LINES, 0, 6);
+
+    // 구
+    glBindBuffer(GL_ARRAY_BUFFER, vbo_pos);
+    glBufferData(GL_ARRAY_BUFFER,
+        sphereVertexCount * 3 * sizeof(GLfloat),
+        spherePosition, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vbo_color);
+    glBufferData(GL_ARRAY_BUFFER,
+        sphereVertexCount * 3 * sizeof(GLfloat),
+        sphereColor, GL_STATIC_DRAW);
+
+    // 삼각형 구조를 확인하기 위해 선으로 표시
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glDrawArrays(GL_TRIANGLES, 0, sphereVertexCount);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
 void Reshape(GLFWwindow*, int width, int height)
