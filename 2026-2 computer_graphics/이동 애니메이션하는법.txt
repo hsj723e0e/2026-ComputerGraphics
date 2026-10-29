@@ -1,0 +1,32 @@
+1. 배열에 바로 인덱스 하지 말고 int a = 랜덤값; 이렇게 하고 rects.push_back(Rect{a,b,c,d}); 이런식으로 줘야함
+
+
+	update()호출하기   이건 main while문 안에
+	Update() 함수는 복사해서 만들자 
+
+//전역변수//
+float Timer();
+void Move(float dt);
+
+//렌더링루프//
+float dt = Timer();
+Move(dt);
+
+//함수 정의//
+float Timer() {
+
+	double now = glfwGetTime();
+	float dt = static_cast<float>(now - lastTime);
+	lastTime = now;
+
+	return dt;
+}
+
+void Move(float dt) {
+	if (isMove_1_shape) {
+		float dx = shapes[0].speedX * dt;
+		float dy = shapes[0].speedY * dt;
+		shapes[0].move(dx, dy);
+
+	}
+}
