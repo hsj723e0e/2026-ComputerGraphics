@@ -1,0 +1,21 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="2026-2 computer_graphics/2026-2 computer_graphics.vcxproj" Id="fa20d3f1-10fc-4a77-bad0-f4b15e3aa218" />
+  <Project Path="openGL - 12/openGL - 12.vcxproj" Id="0b477f3f-083c-4c49-9eee-42abdca55a76" />
+  <Project Path="openGL-10/Test10.vcxproj" Id="a511dd3f-705c-47fd-8d1b-5ab7012e6b65" />
+  <Project Path="openGL-7/openGL.vcxproj" Id="b08ab7cf-9ba4-406d-98f3-b45f3e590675" />
+  <Project Path="openGL-8/Test8.vcxproj" Id="5c166678-70d8-4fbc-bc92-8fefebcf18cf" />
+  <Project Path="openGL-9/Test9.vcxproj" Id="6ff0a59e-b8c2-47ee-8fac-236f3632f4ec" />
+  <Project Path="test11/test11.vcxproj" Id="bd8ad34c-6e4e-444a-81a4-f49234a9dd42" />
+  <Project Path="test13찐/test13찐.vcxproj" Id="a4417d9a-91d4-493e-8494-5632d9d55ffe" />
+  <Project Path="test14/test14.vcxproj" Id="d0bbdaea-b85a-42c1-80fe-1cf9334b715b" />
+  <Project Path="test15/test15.vcxproj" Id="2f458571-fe03-48ac-b8f4-ce4c8fc5bf54" />
+  <Project Path="test16/test16.vcxproj" Id="3e12af34-d4e1-4be6-9d26-c52da62b8f7b" />
+  <Project Path="test17/test17.vcxproj" Id="0595c740-3a28-4f72-8156-111212d7c263" />
+  <Project Path="test18/test18.vcxproj" Id="7086a1a8-e319-4c35-a57a-3849ff269b2e" />
+  <Project Path="test18_real/test18_real.vcxproj" Id="634cb5a2-aec9-4d44-b89b-dacf7418b63e" />
+</Solution>
+
