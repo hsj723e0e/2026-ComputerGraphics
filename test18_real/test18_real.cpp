@@ -26,16 +26,16 @@ typedef struct { //교수님
     Face* faces;
     size_t face_count;
 } Model;
-typedef struct {
-    Model* model = nullptr;
+
+Model sphere{}; // 불변
+
+struct Body {
     glm::vec3 position = glm::vec3(0.0f);
     glm::mat4 rotation = glm::mat4(1.0f);
-    float size = 1.0f;
-} Body;
+    glm::vec3 size = glm::vec3(1.0f);
+} ;
 
-Model sphere{};
 Body sun{};
-Body earth[3]{};
 
 GLfloat* spherePosition = nullptr;
 GLfloat* sphereColor = nullptr;
@@ -57,6 +57,15 @@ void InitBuffer();
 void drawScene();
 void Reshape(GLFWwindow* window, int width, int height);
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+
+void resetScene() {
+
+    sun = Body{};
+    sun.position = glm::vec3(0.0f, 0.0f, 0.0f);
+    sun.rotation = glm::mat4(1.0f);
+    sun.size = glm::vec3(1.0f);
+
+}
 
 void read_newline(char* str) // 교수님
 {
@@ -160,6 +169,7 @@ int main()
     glEnable(GL_DEPTH_TEST);
     read_obj_file("sphere.txt", &sphere);
     InitBuffer();
+    resetScene();
 
     glfwSetFramebufferSizeCallback(window, Reshape);
     glfwSetKeyCallback(window, keyCallback);
@@ -253,8 +263,8 @@ void drawScene()
     glm::mat4 Rx = glm::rotate(glm::mat4(1.0f), glm::radians(xAngle), glm::vec3(1.0f, 0.0f, 0.0f));
     glm::mat4 Ry = glm::rotate(glm::mat4(1.0f), glm::radians(yAngle), glm::vec3(0.0f, 1.0f, 0.0f));
     glm::mat4 projection = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
-    glm::mat4 modelTransform = projection * Rx * Ry;
-    glUniformMatrix4fv(modelLocation, 1, GL_FALSE, &modelTransform[0][0]);
+    glm::mat4 base = projection * Rx * Ry;
+    glUniformMatrix4fv(modelLocation, 1, GL_FALSE, &base[0][0]);
 
     // 축
     glBindBuffer(GL_ARRAY_BUFFER, vbo_pos);
@@ -266,22 +276,31 @@ void drawScene()
         sizeof(axisColor), axisColor, GL_STATIC_DRAW);
 
     glDrawArrays(GL_LINES, 0, 6);
-
+    //-----------------------------------------------------------------------------------------
     // 구
-    glBindBuffer(GL_ARRAY_BUFFER, vbo_pos);
-    glBufferData(GL_ARRAY_BUFFER,
-        sphereVertexCount * 3 * sizeof(GLfloat),
-        spherePosition, GL_STATIC_DRAW);
+    {
+        glm::mat4 T = glm::translate(glm::mat4(1.0f), sun.position);
+        glm::mat4 R = sun.rotation;
+        glm::mat4 S = glm::scale(glm::mat4(1.0f), sun.size);
+        glm::mat4 sunTransform = base * T * R * S; // 중요!
 
-    glBindBuffer(GL_ARRAY_BUFFER, vbo_color);
-    glBufferData(GL_ARRAY_BUFFER,
-        sphereVertexCount * 3 * sizeof(GLfloat),
-        sphereColor, GL_STATIC_DRAW);
+        glUniformMatrix4fv(modelLocation, 1, GL_FALSE, &sunTransform[0][0]);
 
-    // 삼각형 구조를 확인하기 위해 선으로 표시
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    glDrawArrays(GL_TRIANGLES, 0, sphereVertexCount);
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        glBindBuffer(GL_ARRAY_BUFFER, vbo_pos);
+        glBufferData(GL_ARRAY_BUFFER,
+            sphereVertexCount * 3 * sizeof(GLfloat),
+            spherePosition, GL_DYNAMIC_DRAW);
+
+        glBindBuffer(GL_ARRAY_BUFFER, vbo_color);
+        glBufferData(GL_ARRAY_BUFFER,
+            sphereVertexCount * 3 * sizeof(GLfloat),
+            sphereColor, GL_DYNAMIC_DRAW);
+
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        glDrawArrays(GL_TRIANGLES, 0, sphereVertexCount);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+    }
 }
 
 void Reshape(GLFWwindow*, int width, int height)
