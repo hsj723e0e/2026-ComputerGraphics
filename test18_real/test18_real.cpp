@@ -175,6 +175,40 @@ int main()
 
 void InitBuffer()
 {
+    sphereVertexCount = static_cast<GLsizei>(sphere.face_count * 3);
+
+    spherePosition = (GLfloat*)malloc(
+        sphereVertexCount * 3 * sizeof(GLfloat));
+
+    sphereColor = (GLfloat*)malloc(
+        sphereVertexCount * 3 * sizeof(GLfloat));
+
+    if (!spherePosition || !sphereColor) {
+        exit(EXIT_FAILURE);
+    }
+
+    for (size_t i = 0; i < sphere.face_count; ++i) {
+        unsigned int indices[3] = {
+            sphere.faces[i].v1,
+            sphere.faces[i].v2,
+            sphere.faces[i].v3
+        };
+
+        for (int j = 0; j < 3; ++j) {
+            Vertex vertex = sphere.vertices[indices[j]];
+            size_t offset = (i * 3 + j) * 3;
+
+            spherePosition[offset] = vertex.x;
+            spherePosition[offset + 1] = vertex.y;
+            spherePosition[offset + 2] = vertex.z;
+
+            // 파란색
+            sphereColor[offset] = 0.2f;
+            sphereColor[offset + 1] = 0.5f;
+            sphereColor[offset + 2] = 1.0f;
+        }
+    }
+
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
     glGenBuffers(1, &vbo_pos);
