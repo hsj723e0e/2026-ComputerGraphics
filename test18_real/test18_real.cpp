@@ -149,6 +149,7 @@ int main()
     }
     modelLocation = glGetUniformLocation(shaderProgramID, "modelTransform");
     glEnable(GL_DEPTH_TEST);
+    read_obj_file("sphere.txt", &sphere);
     InitBuffer();
 
     glfwSetFramebufferSizeCallback(window, Reshape);
