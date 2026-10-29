@@ -205,18 +205,12 @@ void InitBuffer()
             spherePosition[offset] = vertex.x;
             spherePosition[offset + 1] = vertex.y;
             spherePosition[offset + 2] = vertex.z;
+            
+            sphereColor[offset] = 0.2f;
+            sphereColor[offset + 1] = 0.5f;
+            sphereColor[offset + 2] = 1.0f;
+            
 
-            // 파란색
-            if (i % 2 == 0) {
-                sphereColor[offset] = 1.0f;
-                sphereColor[offset + 1] = 0.0f;
-                sphereColor[offset + 2] = 0.0f;
-            }
-            else {
-                sphereColor[offset] = 0.0f;
-                sphereColor[offset + 1] = 0.0f;
-                sphereColor[offset + 2] = 1.0f;
-            }
         }
     }
 
@@ -276,7 +270,7 @@ void drawScene()
         sphereColor, GL_STATIC_DRAW);
 
     // 삼각형 구조를 확인하기 위해 선으로 표시
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     glDrawArrays(GL_TRIANGLES, 0, sphereVertexCount);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
