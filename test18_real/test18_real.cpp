@@ -27,6 +27,11 @@ typedef struct { //교수님
     size_t face_count;
 } Model;
 
+Model sphere{};
+GLfloat* spherePosition = nullptr;
+GLfloat* sphereColor = nullptr;
+GLsizei sphereVertexCount = 0;
+
 // 각 축은 두 정점을 연결한 선으로 그린다.
 GLfloat axisPosition[6][3] = {
     {-0.9f, 0.0f, 0.0f}, {0.9f, 0.0f, 0.0f}, // x축
