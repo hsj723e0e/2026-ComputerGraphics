@@ -36,6 +36,7 @@ struct Body {
 } ;
 
 Body sun{};
+Body earth[3]{};
 
 GLfloat* spherePosition = nullptr;
 GLfloat* sphereColor = nullptr;
@@ -64,6 +65,15 @@ void resetScene() {
     sun.position = glm::vec3(0.0f, 0.0f, 0.0f);
     sun.rotation = glm::mat4(1.0f);
     sun.size = glm::vec3(1.0f);
+
+    for (int i = 0; i < 3; ++i) {
+        earth[i] = Body{};
+        earth[i].position = glm::vec3(0.0f, 0.0f, 0.0f);
+        earth[i].rotation = glm::mat4(1.0f);
+        earth[i].size = glm::vec3(0.6f);
+
+    }
+
 
 }
 
@@ -277,7 +287,7 @@ void drawScene()
 
     glDrawArrays(GL_LINES, 0, 6);
     //-----------------------------------------------------------------------------------------
-    // 구
+    // 구 (태양)
     {
         glm::mat4 T = glm::translate(glm::mat4(1.0f), sun.position);
         glm::mat4 R = sun.rotation;
@@ -299,6 +309,35 @@ void drawScene()
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         glDrawArrays(GL_TRIANGLES, 0, sphereVertexCount);
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+    }
+    // 지구
+    {
+        for (int i = 0; i < 3; ++i) {
+            const Body& e = earth[i];
+
+            glm::mat4 T = glm::translate(glm::mat4(1.0f), e.position);
+            glm::mat4 R = e.rotation;
+            glm::mat4 S = glm::scale(glm::mat4(1.0f), e.size);
+            glm::mat4 earthTransform = base * T * R * S; // 중요!
+
+            glUniformMatrix4fv(modelLocation, 1, GL_FALSE, &earthTransform[0][0]);
+
+            glBindBuffer(GL_ARRAY_BUFFER, vbo_pos);
+            glBufferData(GL_ARRAY_BUFFER,
+                sphereVertexCount * 3 * sizeof(GLfloat),
+                spherePosition, GL_DYNAMIC_DRAW);
+
+            glBindBuffer(GL_ARRAY_BUFFER, vbo_color);
+            glBufferData(GL_ARRAY_BUFFER,
+                sphereVertexCount * 3 * sizeof(GLfloat),
+                sphereColor, GL_DYNAMIC_DRAW);
+
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+            glDrawArrays(GL_TRIANGLES, 0, sphereVertexCount);
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+        }
 
     }
 }
