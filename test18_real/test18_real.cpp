@@ -161,16 +161,16 @@ void Earth_orbit(Body& earth, float degrees, float tilt_degrees) { // 모델, �
 
 void Move(float dt) {
     float speed0 = 30.0f;
-    float speed1 = 30.0f;
-    float speed2 = 30.0f;
+    float speed1 = 45.0f;
+    float speed2 = 60.0f;
 
     float degree0 = speed0 * dt;
     float degree1 = speed1 * dt;
     float degree2 = speed2 * dt;
 
     Earth_orbit(earth[0], degree0, 0.0f);
-    Earth_orbit(earth[1], degree0, 45.0f);
-    Earth_orbit(earth[2], degree0, -45.0f);
+    Earth_orbit(earth[1], degree1, 45.0f);
+    Earth_orbit(earth[2], degree2, -45.0f);
 }
 
 float Timer() {
