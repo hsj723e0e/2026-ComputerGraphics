@@ -57,6 +57,9 @@ GLfloat axisColor[6][3] = {
 };
 
 double lastTime = 0.0;
+bool isM = false;
+bool isP = false;
+
 void InitBuffer();
 void drawScene();
 void Reshape(GLFWwindow* window, int width, int height);
@@ -292,8 +295,19 @@ void drawScene()
     // test13의 기본 변환: y축 회전 → x축 회전 → 정사영
     glm::mat4 Rx = glm::rotate(glm::mat4(1.0f), glm::radians(xAngle), glm::vec3(1.0f, 0.0f, 0.0f));
     glm::mat4 Ry = glm::rotate(glm::mat4(1.0f), glm::radians(yAngle), glm::vec3(0.0f, 1.0f, 0.0f));
-    glm::mat4 projection = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
-    glm::mat4 base = projection * Rx * Ry;
+    glm::mat4 projection;
+    if (!isP) {
+        projection = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -10.0f, 10.0f); // 4개인자, 값 낮게하면 좁은공간을 화면전체에 표시 즉 크게보임, 깊이
+    }
+    else projection = glm::perspective(glm::radians(68.43f), 1.0f, 0.1f, 100.0f); // fovy:커지면 넓게보여 물체가 작아짐, aspect:크면 가로가 넓게보임
+    // near: 커지면 가까운 물체가 더 많이 잘림 far :  커지면 더 먼 물체까지 표시 가능
+
+    glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 2.0f); //--카메라 위치 
+    glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f); //--카메라가 바라보는 기준점
+    glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);  //--카메라의 위쪽 방향
+    glm::mat4 view = glm::lookAt(cameraPos, cameraTarget, cameraUp);
+
+    glm::mat4 base = projection * view * Rx * Ry;
     glUniformMatrix4fv(modelLocation, 1, GL_FALSE, &base[0][0]);
 
     // 축
@@ -420,6 +434,10 @@ void keyCallback(GLFWwindow* window, int key, int, int action, int)
     if (key == GLFW_KEY_Q && action == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, GLFW_TRUE);
     }
+    if (key == GLFW_KEY_P && action == GLFW_PRESS) {
+        isP = !isP;
+        return;
+    }
 }
 
 int main()
@@ -429,7 +447,7 @@ int main()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow* window = glfwCreateWindow(800, 800, "Test 18 Real - XYZ Axes", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(1600, 1200, "Test 18 Real - XYZ Axes", nullptr, nullptr);
     if (!window) {
         glfwTerminate();
         return -1;
