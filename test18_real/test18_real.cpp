@@ -60,6 +60,8 @@ double lastTime = 0.0;
 bool isM = false;
 bool isP = false;
 glm::vec3 scenePosition(0.0f);
+float earth_radius = 0.0f;
+float moon_radius = 0.0f;
 
 void InitBuffer();
 void drawScene();
@@ -73,6 +75,7 @@ void resetScene() {
     sun.rotation = glm::mat4(1.0f);
     sun.size = glm::vec3(1.0f);
 
+    
     for (int i = 0; i < 3; ++i) {
         earth[i] = Body{};
         earth[i].position = glm::vec3(1.0f, 0.0f, 0.0f);
@@ -332,13 +335,13 @@ void drawScene()
         glm::mat4 tilt = glm::rotate(
             glm::mat4(1.0f), glm::radians(tilts[i]),
             glm::vec3(1.0f, 0.0f, 0.0f));
-        drawOrbit(base * tilt, 1.0f);
+        drawOrbit(base * tilt, 1.0f + earth_radius);
     }
 
     // 달의 공전 경로: 각 지구를 중심으로 이동하며 XZ 평면과 평행하다.
     for (int i = 0; i < 3; ++i) {
         glm::mat4 earthMove = glm::translate(glm::mat4(1.0f), earth[i].position);
-        drawOrbit(base * earthMove, 0.3f);
+        drawOrbit(base * earthMove, 0.3f + moon_radius);
     }
     if(isM)glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     else  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -431,7 +434,7 @@ void Reshape(GLFWwindow*, int width, int height)
     glViewport((width - size) / 2, (height - size) / 2, size, size);
 }
 
-void keyCallback(GLFWwindow* window, int key, int, int action, int)
+void keyCallback(GLFWwindow* window, int key, int, int action, int mods)
 {
     if (action != GLFW_PRESS && action != GLFW_REPEAT) {
         return;
@@ -470,6 +473,17 @@ void keyCallback(GLFWwindow* window, int key, int, int action, int)
     if (key == GLFW_KEY_KP_SUBTRACT) {
         scenePosition.z -= 0.05f;
         return;
+    }
+    if (key == GLFW_KEY_1) {
+        earth_radius += 0.1f;
+        moon_radius += 0.1f;
+
+        for (int i = 0; i < 3; ++i) {
+            earth[i].position =
+                glm::normalize(earth[i].position) * (earth_radius + 1.0f);
+            moon[i].position =
+                glm::normalize(moon[i].position) * (moon_radius + 0.3f);
+        }
     }
 }
 
