@@ -68,6 +68,7 @@ float moon_radius = 0.0f;
 bool sungrowing;
 float suncolortime = 0.0f;
 bool is2 = false;
+bool is3 = false;
 
 void InitBuffer();
 void drawScene();
@@ -167,11 +168,14 @@ void read_obj_file(const char* filename, Model* model) // 교수님 - OBJ파일 
     fclose(file); // PDF 41쪽: 파일 닫기
 }
 void Moon_orbit(Body& moon, float degrees) {
-    glm::mat4 R = glm::rotate(glm::mat4(1.0f), glm::radians(degrees), glm::vec3(0.0f, 1.0f, 0.0f));
+    glm::mat4 R;
+    if(is3) R = glm::rotate(glm::mat4(1.0f), glm::radians(degrees), glm::vec3(0.0f, 0.0f, 1.0f));
+    else R = glm::rotate(glm::mat4(1.0f), glm::radians(degrees), glm::vec3(0.0f, 1.0f, 0.0f));
+
     // 중앙 y축 공전: 위치와 방향을 함께 회전한다.
     moon.position = glm::vec3(R * glm::vec4(moon.position, 1.0f)); // 위치 바꾸기
 }
-
+ 
 void Earth_orbit(Body& earth, float degrees, float tilt_degrees) { // 모델, 이번에 얼마나 회전할지, 
     glm::mat4 tilt = glm::rotate(glm::mat4(1.0f), glm::radians(tilt_degrees), glm::vec3(1.0f, 0.0f, 0.0f));
 
@@ -397,9 +401,12 @@ void drawScene()
     }
 
     // 달의 공전 경로: 각 지구를 중심으로 이동하며 XZ 평면과 평행하다.
+    glm::mat4 orbitRotation = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+
     for (int i = 0; i < 3; ++i) {
         glm::mat4 earthMove = glm::translate(glm::mat4(1.0f), earth[i].position);
-        drawOrbit(base * earthMove, 0.3f + moon_radius);
+        if(is3) drawOrbit(base * earthMove * orbitRotation, 0.3f + moon_radius);
+        else drawOrbit(base * earthMove , 0.3f + moon_radius);
     }
     if (isM)glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     else  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -551,6 +558,20 @@ void keyCallback(GLFWwindow* window, int key, int, int action, int mods)
     }
     if (key == GLFW_KEY_2) {
         is2 = !is2;
+    }
+    if (key == GLFW_KEY_3) {
+        is3 = !is3;
+        float angle;
+        if (is3) {
+            angle = 90.0f;
+        }
+        else {
+            angle = -90.0f;
+        }
+        glm::mat4 R = glm::rotate(glm::mat4(1.0f), glm::radians(angle), glm::vec3(1.0f, 0.0f, 0.0f));
+        for (int i = 0; i < 3; ++i) {
+            moon[i].position = glm::vec3(R * glm::vec4(moon[i].position, 1.0f));
+        }
     }
 }
 
