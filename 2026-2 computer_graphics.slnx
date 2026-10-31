@@ -17,5 +17,6 @@
   <Project Path="test17/test17.vcxproj" Id="0595c740-3a28-4f72-8156-111212d7c263" />
   <Project Path="test18/test18.vcxproj" Id="7086a1a8-e319-4c35-a57a-3849ff269b2e" />
   <Project Path="test18_real/test18_real.vcxproj" Id="634cb5a2-aec9-4d44-b89b-dacf7418b63e" />
+  <Project Path="test19/test19.vcxproj" Id="38d78ecb-48a6-4645-a9d5-53f6a2803057" />
 </Solution>
 
