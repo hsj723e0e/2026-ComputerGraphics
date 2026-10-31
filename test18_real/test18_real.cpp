@@ -54,6 +54,7 @@ GLfloat axisColor[6][3] = {
     { 0.0f, 0.0f, 1.0f },{ 0.0f, 0.0f, 1.0f }  // 파랑
 };
 
+double lastTime = 0.0;
 void InitBuffer();
 void drawScene();
 void Reshape(GLFWwindow* window, int width, int height);
@@ -68,7 +69,7 @@ void resetScene() {
 
     for (int i = 0; i < 3; ++i) {
         earth[i] = Body{};
-        earth[i].position = glm::vec3(0.0f, 0.0f, 0.0f);
+        earth[i].position = glm::vec3(1.0f, 0.0f, 0.0f);
         earth[i].rotation = glm::mat4(1.0f);
         earth[i].size = glm::vec3(0.6f);
 
@@ -145,65 +146,38 @@ void read_obj_file(const char* filename, Model* model) // 교수님 - OBJ파일 
     fclose(file); // PDF 41쪽: 파일 닫기
 }
 
-int main()
-{
-    if (!glfwInit()) return -1;
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+void Earth_orbit(Body& earth, float degrees, float tilt_degrees) { // 모델, 이번에 얼마나 회전할지, 
+    glm::mat4 tilt = glm::rotate(glm::mat4(1.0f), glm::radians(tilt_degrees), glm::vec3(1.0f, 0.0f, 0.0f));
 
-    GLFWwindow* window = glfwCreateWindow(800, 800, "Test 18 Real - XYZ Axes", nullptr, nullptr);
-    if (!window) {
-        glfwTerminate();
-        return -1;
-    }
-    glfwMakeContextCurrent(window);
-    glewExperimental = GL_TRUE;
-    if (glewInit() != GLEW_OK) {
-        glfwDestroyWindow(window);
-        glfwTerminate();
-        return -1;
-    }
-    glfwSwapInterval(1);
+    glm::vec4 originalAxis(0.0f, 1.0f, 0.0f, 0.0f);
+    glm::vec4 tiledAxis = tilt * originalAxis;
+    glm::vec3 orbitAxis = glm::vec3(tiledAxis);
 
-    // 셰이더 파일을 읽고 프로그램을 만든다.
-    make_vertexShaders();
-    make_fragmentShaders();
-    shaderProgramID = make_shaderProgram();
-    if (shaderProgramID == 0) {
-        glfwDestroyWindow(window);
-        glfwTerminate();
-        return -1;
-    }
-    modelLocation = glGetUniformLocation(shaderProgramID, "modelTransform");
-    glEnable(GL_DEPTH_TEST);
-    read_obj_file("sphere.txt", &sphere);
-    InitBuffer();
-    resetScene();
+    glm::mat4 R = glm::rotate(glm::mat4(1.0f), glm::radians(degrees), orbitAxis);
+    // 중앙 y축 공전: 위치와 방향을 함께 회전한다.
+    earth.position = glm::vec3(R * glm::vec4(earth.position, 1.0f)); // 위치 바꾸기
+    earth.rotation = R * earth.rotation; // 자기자신을 회전
+}
 
-    glfwSetFramebufferSizeCallback(window, Reshape);
-    glfwSetKeyCallback(window, keyCallback);
-    int width, height;
-    glfwGetFramebufferSize(window, &width, &height);
-    Reshape(window, width, height);
+void Move(float dt) {
+    float speed0 = 30.0f;
+    float speed1 = 30.0f;
+    float speed2 = 30.0f;
 
-    while (!glfwWindowShouldClose(window)) {
-        drawScene();
-        glfwSwapBuffers(window);
-        glfwPollEvents();
-    }
+    float degree0 = speed0 * dt;
+    float degree1 = speed1 * dt;
+    float degree2 = speed2 * dt;
 
-    glDeleteBuffers(1, &vbo_pos);
-    glDeleteBuffers(1, &vbo_color);
-    glDeleteVertexArrays(1, &vao);
-    glDeleteProgram(shaderProgramID);
-    free(sphere.vertices);
-    free(sphere.faces);
-    free(spherePosition);
-    free(sphereColor);
-    glfwDestroyWindow(window);
-    glfwTerminate();
-    return 0;
+    Earth_orbit(earth[0], degree0, 0.0f);
+    Earth_orbit(earth[1], degree0, 45.0f);
+    Earth_orbit(earth[2], degree0, -45.0f);
+}
+
+float Timer() {
+    double now = glfwGetTime();
+    float dt = static_cast<float>(now - lastTime);
+    lastTime = now;
+    return dt;
 }
 
 void InitBuffer()
@@ -355,3 +329,68 @@ void keyCallback(GLFWwindow* window, int key, int, int action, int)
         glfwSetWindowShouldClose(window, GLFW_TRUE);
     }
 }
+
+int main()
+{
+    if (!glfwInit()) return -1;
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+    GLFWwindow* window = glfwCreateWindow(800, 800, "Test 18 Real - XYZ Axes", nullptr, nullptr);
+    if (!window) {
+        glfwTerminate();
+        return -1;
+    }
+    glfwMakeContextCurrent(window);
+    glewExperimental = GL_TRUE;
+    if (glewInit() != GLEW_OK) {
+        glfwDestroyWindow(window);
+        glfwTerminate();
+        return -1;
+    }
+    glfwSwapInterval(1);
+
+    // 셰이더 파일을 읽고 프로그램을 만든다.
+    make_vertexShaders();
+    make_fragmentShaders();
+    shaderProgramID = make_shaderProgram();
+    if (shaderProgramID == 0) {
+        glfwDestroyWindow(window);
+        glfwTerminate();
+        return -1;
+    }
+    modelLocation = glGetUniformLocation(shaderProgramID, "modelTransform");
+    glEnable(GL_DEPTH_TEST);
+    read_obj_file("sphere.txt", &sphere);
+    InitBuffer();
+    resetScene();
+
+    glfwSetFramebufferSizeCallback(window, Reshape);
+    glfwSetKeyCallback(window, keyCallback);
+    int width, height;
+    glfwGetFramebufferSize(window, &width, &height);
+    Reshape(window, width, height);
+
+    while (!glfwWindowShouldClose(window)) {
+        glfwPollEvents();
+        float dt = Timer();
+        Move(dt);
+        drawScene();
+        glfwSwapBuffers(window);
+
+    }
+
+    glDeleteBuffers(1, &vbo_pos);
+    glDeleteBuffers(1, &vbo_color);
+    glDeleteVertexArrays(1, &vao);
+    glDeleteProgram(shaderProgramID);
+    free(sphere.vertices);
+    free(sphere.faces);
+    free(spherePosition);
+    free(sphereColor);
+    glfwDestroyWindow(window);
+    glfwTerminate();
+    return 0;
+}
+
