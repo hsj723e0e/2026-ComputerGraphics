@@ -463,7 +463,14 @@ void keyCallback(GLFWwindow* window, int key, int, int action, int)
         scenePosition.x += 0.05f;
         return;
     }
-
+    if (key == GLFW_KEY_KP_ADD) {
+        scenePosition.z += 0.05f;
+        return;
+    }
+    if (key == GLFW_KEY_KP_SUBTRACT) {
+        scenePosition.z -= 0.05f;
+        return;
+    }
 }
 
 int main()
