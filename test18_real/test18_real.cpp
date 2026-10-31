@@ -37,6 +37,7 @@ struct Body {
 
 Body sun{};
 Body earth[3]{};
+Body moon[3]{};
 
 GLfloat* spherePosition = nullptr;
 GLfloat* sphereColor = nullptr;
@@ -75,6 +76,12 @@ void resetScene() {
 
     }
 
+    for (int i = 0; i < 3; ++i) {
+        moon[i] = Body{};
+        moon[i].position = glm::vec3(1.0f, 0.0f, 0.0f);
+        moon[i].rotation = glm::mat4(1.0f);
+        moon[i].size = glm::vec3(0.3f);
+    }
 
 }
 
@@ -304,6 +311,34 @@ void drawScene()
 
             glDisableVertexAttribArray(1);
             glVertexAttrib3f(1, 0.0f, 1.0f, 0.0f);
+
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+            glDrawArrays(GL_TRIANGLES, 0, sphereVertexCount);
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+            glEnableVertexAttribArray(1);
+        }
+
+    }
+    // 달
+    {
+        for (int i = 0; i < 3; ++i) {
+            const Body& m = moon[i];
+
+            glm::mat4 T = glm::translate(glm::mat4(1.0f), m.position);
+            glm::mat4 R = m.rotation;
+            glm::mat4 S = glm::scale(glm::mat4(1.0f), m.size);
+            glm::mat4 moonTransform = base * T * R * S; // 중요!
+
+            glUniformMatrix4fv(modelLocation, 1, GL_FALSE, &moonTransform[0][0]);
+
+            glBindBuffer(GL_ARRAY_BUFFER, vbo_pos);
+            glBufferData(GL_ARRAY_BUFFER,
+                sphereVertexCount * 3 * sizeof(GLfloat),
+                spherePosition, GL_DYNAMIC_DRAW);
+
+            glDisableVertexAttribArray(1);
+            glVertexAttrib3f(1, 1.0f, 0.0f, 0.0f);
 
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
             glDrawArrays(GL_TRIANGLES, 0, sphereVertexCount);
