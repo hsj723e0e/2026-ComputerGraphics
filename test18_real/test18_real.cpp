@@ -59,6 +59,7 @@ GLfloat axisColor[6][3] = {
 double lastTime = 0.0;
 bool isM = false;
 bool isP = false;
+glm::vec3 scenePosition(0.0f);
 
 void InitBuffer();
 void drawScene();
@@ -307,8 +308,12 @@ void drawScene()
     glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);  //--카메라의 위쪽 방향
     glm::mat4 view = glm::lookAt(cameraPos, cameraTarget, cameraUp);
 
-    glm::mat4 base = projection * view * Rx * Ry;
-    glUniformMatrix4fv(modelLocation, 1, GL_FALSE, &base[0][0]);
+    glm::mat4 sceneMove = glm::translate(glm::mat4(1.0f), scenePosition);
+
+    glm::mat4 base = projection * view * Rx * Ry * sceneMove;
+    glm::mat4 axisTransform = projection * view * Rx * Ry;
+
+    glUniformMatrix4fv(modelLocation, 1, GL_FALSE, &axisTransform[0][0]);
 
     // 축
     glBindBuffer(GL_ARRAY_BUFFER, vbo_pos);
@@ -428,6 +433,9 @@ void Reshape(GLFWwindow*, int width, int height)
 
 void keyCallback(GLFWwindow* window, int key, int, int action, int)
 {
+    if (action != GLFW_PRESS && action != GLFW_REPEAT) {
+        return;
+    }
     if (key == GLFW_KEY_Q && action == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, GLFW_TRUE);
     }
@@ -439,6 +447,23 @@ void keyCallback(GLFWwindow* window, int key, int, int action, int)
         isM = !isM;
         return;
     }
+    if (key == GLFW_KEY_W ) {
+        scenePosition.y += 0.05f;
+        return;
+    }
+    if (key == GLFW_KEY_S) {
+        scenePosition.y -= 0.05f;
+        return;
+    }
+    if (key == GLFW_KEY_A) {
+        scenePosition.x -= 0.05f;
+        return;
+    }
+    if (key == GLFW_KEY_D) {
+        scenePosition.x += 0.05f;
+        return;
+    }
+
 }
 
 int main()
