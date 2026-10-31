@@ -7,6 +7,9 @@
 #include <gl/glm/glm.hpp>
 #include <gl/glm/gtc/matrix_transform.hpp>
 #include "shader.h"
+#include <random>
+std::random_device dre;
+std::mt19937 gen(dre());
 
 GLuint vao, vbo_pos, vbo_color;
 GLint modelLocation;
@@ -62,6 +65,8 @@ bool isP = false;
 glm::vec3 scenePosition(0.0f);
 float earth_radius = 0.0f;
 float moon_radius = 0.0f;
+bool sungrowing;
+float suncolortime = 0.0f;
 
 void InitBuffer();
 void drawScene();
@@ -178,6 +183,54 @@ void Earth_orbit(Body& earth, float degrees, float tilt_degrees) { // 모델, �
     earth.position = glm::vec3(R * glm::vec4(earth.position, 1.0f)); // 위치 바꾸기
 }
 
+void change_Suncolor(float dt) {
+    suncolortime += dt;
+    if (suncolortime < 1.0) return;
+    suncolortime = 0;
+
+    std::uniform_real_distribution<float> color(0.0f, 1.0f);
+    float r = color(dre);
+    float g = color(dre);
+    float b = color(dre);
+    for (size_t i = 0; i < sphere.face_count; ++i) {
+        unsigned int indices[3] = {
+            sphere.faces[i].v1,
+            sphere.faces[i].v2,
+            sphere.faces[i].v3
+        };
+
+        for (int j = 0; j < 3; ++j) {
+            Vertex vertex = sphere.vertices[indices[j]];
+            size_t offset = (i * 3 + j) * 3;
+
+            spherePosition[offset] = vertex.x;
+            spherePosition[offset + 1] = vertex.y;
+            spherePosition[offset + 2] = vertex.z;
+
+            sphereColor[offset] = r;
+            sphereColor[offset + 1] = g;
+            sphereColor[offset + 2] = b;
+        }
+    }
+
+}
+
+void Sun_size_animation(Body& sun, float sunSize) {
+    if (sun.size.x > 1.5) {
+        sungrowing = false;
+    }
+    else if (sun.size.x < 0.5) {
+        sungrowing = true;
+    }
+    if (sungrowing) {
+        sun.size += glm::vec3(sunSize);
+    }
+    else {
+        sun.size -= glm::vec3(sunSize);
+    }
+}
+
+
 void Move(float dt) {
     float speed0 = 30.0f;
     float speed1 = 45.0f;
@@ -196,6 +249,10 @@ void Move(float dt) {
     Moon_orbit(moon[1], moondegree);
     Moon_orbit(moon[2], moondegree);
 
+    float sunSize =  dt;
+    Sun_size_animation(sun, sunSize);
+
+    change_Suncolor(dt);
 }
 
 float Timer() {
