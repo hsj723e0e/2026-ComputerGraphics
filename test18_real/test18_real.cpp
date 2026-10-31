@@ -335,6 +335,9 @@ void drawScene()
         glm::mat4 earthMove = glm::translate(glm::mat4(1.0f), earth[i].position);
         drawOrbit(base * earthMove, 0.3f);
     }
+    if(isM)glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    else  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
     //-----------------------------------------------------------------------------------------
     // 구 (태양)
     {
@@ -355,9 +358,7 @@ void drawScene()
             sphereVertexCount * 3 * sizeof(GLfloat),
             sphereColor, GL_DYNAMIC_DRAW);
 
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         glDrawArrays(GL_TRIANGLES, 0, sphereVertexCount);
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
     }
     // 지구
@@ -380,9 +381,7 @@ void drawScene()
             glDisableVertexAttribArray(1);
             glVertexAttrib3f(1, 0.0f, 1.0f, 0.0f);
 
-            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
             glDrawArrays(GL_TRIANGLES, 0, sphereVertexCount);
-            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
             glEnableVertexAttribArray(1);
         }
@@ -412,9 +411,7 @@ void drawScene()
             glDisableVertexAttribArray(1);
             glVertexAttrib3f(1, 1.0f, 0.0f, 0.0f);
 
-            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
             glDrawArrays(GL_TRIANGLES, 0, sphereVertexCount);
-            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
             glEnableVertexAttribArray(1);
         }
@@ -436,6 +433,10 @@ void keyCallback(GLFWwindow* window, int key, int, int action, int)
     }
     if (key == GLFW_KEY_P && action == GLFW_PRESS) {
         isP = !isP;
+        return;
+    }
+    if (key == GLFW_KEY_M && action == GLFW_PRESS) {
+        isM = !isM;
         return;
     }
 }
