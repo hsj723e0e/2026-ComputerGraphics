@@ -34,7 +34,7 @@ struct Body {
     glm::vec3 position = glm::vec3(0.0f);
     glm::mat4 rotation = glm::mat4(1.0f);
     glm::vec3 size = glm::vec3(1.0f);
-} ;
+};
 
 Body sun{};
 Body earth[3]{};
@@ -75,7 +75,7 @@ void resetScene() {
     sun.rotation = glm::mat4(1.0f);
     sun.size = glm::vec3(1.0f);
 
-    
+
     for (int i = 0; i < 3; ++i) {
         earth[i] = Body{};
         earth[i].position = glm::vec3(1.0f, 0.0f, 0.0f);
@@ -233,11 +233,11 @@ void InitBuffer()
             spherePosition[offset] = vertex.x;
             spherePosition[offset + 1] = vertex.y;
             spherePosition[offset + 2] = vertex.z;
-            
+
             sphereColor[offset] = 0.2f;
             sphereColor[offset + 1] = 0.5f;
             sphereColor[offset + 2] = 1.0f;
-            
+
 
         }
     }
@@ -330,7 +330,7 @@ void drawScene()
     glDrawArrays(GL_LINES, 0, 6);
 
     // 지구의 공전 경로: 태양 중심, XZ 평면 및 X축으로 +/-45도 기울인 평면.
-    const float tilts[3] = {0.0f, 45.0f, -45.0f};
+    const float tilts[3] = { 0.0f, 45.0f, -45.0f };
     for (int i = 0; i < 3; ++i) {
         glm::mat4 tilt = glm::rotate(
             glm::mat4(1.0f), glm::radians(tilts[i]),
@@ -343,7 +343,7 @@ void drawScene()
         glm::mat4 earthMove = glm::translate(glm::mat4(1.0f), earth[i].position);
         drawOrbit(base * earthMove, 0.3f + moon_radius);
     }
-    if(isM)glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    if (isM)glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     else  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
     //-----------------------------------------------------------------------------------------
@@ -450,7 +450,7 @@ void keyCallback(GLFWwindow* window, int key, int, int action, int mods)
         isM = !isM;
         return;
     }
-    if (key == GLFW_KEY_W ) {
+    if (key == GLFW_KEY_W) {
         scenePosition.y += 0.05f;
         return;
     }
@@ -475,9 +475,15 @@ void keyCallback(GLFWwindow* window, int key, int, int action, int mods)
         return;
     }
     if (key == GLFW_KEY_1) {
-        earth_radius += 0.1f;
-        moon_radius += 0.1f;
-
+        float amount = 0.05;
+        if (mods & GLFW_MOD_SHIFT) {
+            if(moon_radius > -0.1) moon_radius -= amount;
+            if(earth_radius > -0.7) earth_radius -= amount;
+        }
+        else {
+            earth_radius += amount;
+            moon_radius += amount;
+        }
         for (int i = 0; i < 3; ++i) {
             earth[i].position =
                 glm::normalize(earth[i].position) * (earth_radius + 1.0f);
