@@ -302,15 +302,14 @@ void drawScene()
                 sphereVertexCount * 3 * sizeof(GLfloat),
                 spherePosition, GL_DYNAMIC_DRAW);
 
-            glBindBuffer(GL_ARRAY_BUFFER, vbo_color);
-            glBufferData(GL_ARRAY_BUFFER,
-                sphereVertexCount * 3 * sizeof(GLfloat),
-                sphereColor, GL_DYNAMIC_DRAW);
+            glDisableVertexAttribArray(1);
+            glVertexAttrib3f(1, 0.0f, 1.0f, 0.0f);
 
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
             glDrawArrays(GL_TRIANGLES, 0, sphereVertexCount);
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
+            glEnableVertexAttribArray(1);
         }
 
     }
