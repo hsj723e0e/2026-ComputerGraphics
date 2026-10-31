@@ -27,6 +27,10 @@ typedef struct { //교수님
     size_t face_count;
 } Model;
 
+Model cube{};
+GLfloat* cubePosition = nullptr;
+GLfloat* cubeColor = nullptr;
+GLsizei cubeVertexCount = 0;
 // 각 축은 두 정점을 연결한 선으로 그린다.
 GLfloat axisPosition[6][3] = {
     { -0.9f, 0.0f, 0.0f },{ 0.9f, 0.0f, 0.0f }, // x축
@@ -143,6 +147,7 @@ int main()
         return -1;
     }
     modelLocation = glGetUniformLocation(shaderProgramID, "modelTransform");
+    read_obj_file("cube.txt", &cube);
     glEnable(GL_DEPTH_TEST);
     InitBuffer();
 
@@ -162,13 +167,51 @@ int main()
     glDeleteBuffers(1, &vbo_color);
     glDeleteVertexArrays(1, &vao);
     glDeleteProgram(shaderProgramID);
+    free(cube.vertices);
+    free(cube.faces);
+    free(cubePosition);
+    free(cubeColor);
     glfwDestroyWindow(window);
-    glfwTerminate();
+    glfwTerminate();    
     return 0;
 }
 
 void InitBuffer()
 {
+    cubeVertexCount = static_cast<GLsizei>(cube.face_count * 3);
+
+    cubePosition = (GLfloat*)malloc(
+        cubeVertexCount * 3 * sizeof(GLfloat));
+
+    cubeColor = (GLfloat*)malloc(
+        cubeVertexCount * 3 * sizeof(GLfloat));
+
+    if (!cubePosition || !cubeColor) {
+        exit(EXIT_FAILURE);
+    }
+
+    for (size_t i = 0; i < cube.face_count; ++i) {
+        unsigned int indices[3] = {
+            cube.faces[i].v1,
+            cube.faces[i].v2,
+            cube.faces[i].v3
+        };
+
+        for (int j = 0; j < 3; ++j) {
+            Vertex vertex = cube.vertices[indices[j]];
+            size_t offset = (i * 3 + j) * 3;
+
+            cubePosition[offset] = vertex.x;
+            cubePosition[offset + 1] = vertex.y;
+            cubePosition[offset + 2] = vertex.z;
+
+            // 파란색
+            cubeColor[offset] = 0.2f;
+            cubeColor[offset + 1] = 0.5f;
+            cubeColor[offset + 2] = 1.0f;
+        }
+    }
+
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
     glGenBuffers(1, &vbo_pos);
@@ -201,7 +244,31 @@ void drawScene()
     glm::mat4 modelTransform = projection * Rx * Ry;
     glUniformMatrix4fv(modelLocation, 1, GL_FALSE, &modelTransform[0][0]);
 
+    glBindBuffer(GL_ARRAY_BUFFER, vbo_pos);
+    glBufferData(GL_ARRAY_BUFFER,
+        sizeof(axisPosition), axisPosition, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vbo_color);
+    glBufferData(GL_ARRAY_BUFFER,
+        sizeof(axisColor), axisColor, GL_STATIC_DRAW);
+
     glDrawArrays(GL_LINES, 0, 6);
+
+    // 큐브
+    glBindBuffer(GL_ARRAY_BUFFER, vbo_pos);
+    glBufferData(GL_ARRAY_BUFFER,
+        cubeVertexCount * 3 * sizeof(GLfloat),
+        cubePosition, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vbo_color);
+    glBufferData(GL_ARRAY_BUFFER,
+        cubeVertexCount * 3 * sizeof(GLfloat),
+        cubeColor, GL_STATIC_DRAW);
+
+    // 삼각형 구조를 확인하기 위해 선으로 표시
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glDrawArrays(GL_TRIANGLES, 0, cubeVertexCount);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
 void Reshape(GLFWwindow*, int width, int height)
