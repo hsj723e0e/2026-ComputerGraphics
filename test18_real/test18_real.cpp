@@ -69,6 +69,7 @@ bool sungrowing;
 float suncolortime = 0.0f;
 bool is2 = false;
 bool is3 = false;
+bool is4 = false;
 
 void InitBuffer();
 void drawScene();
@@ -175,7 +176,11 @@ void Moon_orbit(Body& moon, float degrees) {
     // 중앙 y축 공전: 위치와 방향을 함께 회전한다.
     moon.position = glm::vec3(R * glm::vec4(moon.position, 1.0f)); // 위치 바꾸기
 }
- 
+
+void Moon_rotate(Body& moon, float degrees) {
+    glm::mat4 R = glm::rotate(glm::mat4(1.0f), glm::radians(degrees), glm::vec3(0.0f, 0.0f, 1.0f));
+    moon.rotation = glm::mat4(R * moon.rotation);
+}
 void Earth_orbit(Body& earth, float degrees, float tilt_degrees) { // 모델, 이번에 얼마나 회전할지, 
     glm::mat4 tilt = glm::rotate(glm::mat4(1.0f), glm::radians(tilt_degrees), glm::vec3(1.0f, 0.0f, 0.0f));
 
@@ -227,11 +232,13 @@ void Sun_size_animation(Body& sun, float sunSize) {
     else if (sun.size.x < 0.5) {
         sungrowing = true;
     }
-    if (sungrowing) {
-        sun.size += glm::vec3(sunSize);
-    }
-    else {
-        sun.size -= glm::vec3(sunSize);
+    if (is2) {
+        if (sungrowing) {
+            sun.size += glm::vec3(sunSize);
+        }
+        else {
+            sun.size -= glm::vec3(sunSize);
+        }
     }
 }
 
@@ -258,6 +265,12 @@ void Move(float dt) {
     Sun_size_animation(sun, sunSize);
 
     if(is2) change_Suncolor(dt);
+
+    if (is4) {
+        Moon_rotate(moon[0], moondegree);
+        Moon_rotate(moon[1], moondegree);
+        Moon_rotate(moon[2], moondegree);
+    }
 }
 
 float Timer() {
@@ -572,6 +585,9 @@ void keyCallback(GLFWwindow* window, int key, int, int action, int mods)
         for (int i = 0; i < 3; ++i) {
             moon[i].position = glm::vec3(R * glm::vec4(moon[i].position, 1.0f));
         }
+    }
+    if (key == GLFW_KEY_4) {
+        is4 = !is4;
     }
 }
 
