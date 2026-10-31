@@ -1,6 +1,7 @@
 ﻿#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <cmath>
 #include <GL/glew.h>
 #include <GL/glfw3.h>
 #include <gl/glm/glm.hpp>
@@ -78,7 +79,7 @@ void resetScene() {
 
     for (int i = 0; i < 3; ++i) {
         moon[i] = Body{};
-        moon[i].position = glm::vec3(0.15f, 0.0f, 0.0f);
+        moon[i].position = glm::vec3(0.3f, 0.0f, 0.0f);
         moon[i].rotation = glm::mat4(1.0f);
         moon[i].size = glm::vec3(0.3f);
     }
@@ -252,10 +253,38 @@ void InitBuffer()
     glEnableVertexAttribArray(1);
 }
 
+// XZ 평면의 원을 선으로 연결하고, 전달받은 행렬로 배치한다.
+void drawOrbit(const glm::mat4& transform, float radius)
+{
+    const int count = 120;
+    GLfloat positions[count][3];
+    GLfloat colors[count][3];
+
+    for (int i = 0; i < count; ++i) {
+        float angle = glm::radians(360.0f * i / count);
+        positions[i][0] = radius * std::cos(angle);
+        positions[i][1] = 0.0f;
+        positions[i][2] = radius * std::sin(angle);
+
+        colors[i][0] = 0.6f;
+        colors[i][1] = 0.6f;
+        colors[i][2] = 0.6f;
+    }
+
+    glUniformMatrix4fv(modelLocation, 1, GL_FALSE, &transform[0][0]);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vbo_pos);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(positions), positions, GL_DYNAMIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo_color);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_DYNAMIC_DRAW);
+
+    glDrawArrays(GL_LINE_LOOP, 0, count);
+}
+
 void drawScene()
 {
 
-    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glUseProgram(shaderProgramID);
     glBindVertexArray(vao);
@@ -277,6 +306,21 @@ void drawScene()
         sizeof(axisColor), axisColor, GL_STATIC_DRAW);
 
     glDrawArrays(GL_LINES, 0, 6);
+
+    // 지구의 공전 경로: 태양 중심, XZ 평면 및 X축으로 +/-45도 기울인 평면.
+    const float tilts[3] = {0.0f, 45.0f, -45.0f};
+    for (int i = 0; i < 3; ++i) {
+        glm::mat4 tilt = glm::rotate(
+            glm::mat4(1.0f), glm::radians(tilts[i]),
+            glm::vec3(1.0f, 0.0f, 0.0f));
+        drawOrbit(base * tilt, 1.0f);
+    }
+
+    // 달의 공전 경로: 각 지구를 중심으로 이동하며 XZ 평면과 평행하다.
+    for (int i = 0; i < 3; ++i) {
+        glm::mat4 earthMove = glm::translate(glm::mat4(1.0f), earth[i].position);
+        drawOrbit(base * earthMove, 0.3f);
+    }
     //-----------------------------------------------------------------------------------------
     // 구 (태양)
     {
