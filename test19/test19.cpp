@@ -26,8 +26,20 @@ typedef struct { //교수님
     Face* faces;
     size_t face_count;
 } Model;
-
+typedef struct {
+    Model* model = nullptr;
+    glm::vec3 position = glm::vec3(0.0f);
+    glm::mat4 rotation = glm::mat4(1.0f);
+    float size = 1.0f;
+} Body;
 Model cube{};
+
+Body bottomBody[2];  
+Body midBody;
+Body topBody[2];
+Body flagpole[2];
+Body gunBarrel[2];
+
 GLfloat* cubePosition = nullptr;
 GLfloat* cubeColor = nullptr;
 GLsizei cubeVertexCount = 0;
