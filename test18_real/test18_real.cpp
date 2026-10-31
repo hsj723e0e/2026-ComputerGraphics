@@ -78,7 +78,7 @@ void resetScene() {
 
     for (int i = 0; i < 3; ++i) {
         moon[i] = Body{};
-        moon[i].position = glm::vec3(1.0f, 0.0f, 0.0f);
+        moon[i].position = glm::vec3(0.15f, 0.0f, 0.0f);
         moon[i].rotation = glm::mat4(1.0f);
         moon[i].size = glm::vec3(0.3f);
     }
@@ -152,6 +152,11 @@ void read_obj_file(const char* filename, Model* model) // 교수님 - OBJ파일 
     }
     fclose(file); // PDF 41쪽: 파일 닫기
 }
+void Moon_orbit(Body& moon, float degrees) {
+    glm::mat4 R = glm::rotate(glm::mat4(1.0f), glm::radians(degrees), glm::vec3(0.0f, 1.0f, 0.0f));
+    // 중앙 y축 공전: 위치와 방향을 함께 회전한다.
+    moon.position = glm::vec3(R * glm::vec4(moon.position, 1.0f)); // 위치 바꾸기
+}
 
 void Earth_orbit(Body& earth, float degrees, float tilt_degrees) { // 모델, 이번에 얼마나 회전할지, 
     glm::mat4 tilt = glm::rotate(glm::mat4(1.0f), glm::radians(tilt_degrees), glm::vec3(1.0f, 0.0f, 0.0f));
@@ -163,7 +168,6 @@ void Earth_orbit(Body& earth, float degrees, float tilt_degrees) { // 모델, �
     glm::mat4 R = glm::rotate(glm::mat4(1.0f), glm::radians(degrees), orbitAxis);
     // 중앙 y축 공전: 위치와 방향을 함께 회전한다.
     earth.position = glm::vec3(R * glm::vec4(earth.position, 1.0f)); // 위치 바꾸기
-    earth.rotation = R * earth.rotation; // 자기자신을 회전
 }
 
 void Move(float dt) {
@@ -178,6 +182,12 @@ void Move(float dt) {
     Earth_orbit(earth[0], degree0, 0.0f);
     Earth_orbit(earth[1], degree1, 45.0f);
     Earth_orbit(earth[2], degree2, -45.0f);
+
+    float moondegree = 90.0 * dt;
+    Moon_orbit(moon[0], moondegree);
+    Moon_orbit(moon[1], moondegree);
+    Moon_orbit(moon[2], moondegree);
+
 }
 
 float Timer() {
@@ -328,7 +338,11 @@ void drawScene()
             glm::mat4 T = glm::translate(glm::mat4(1.0f), m.position);
             glm::mat4 R = m.rotation;
             glm::mat4 S = glm::scale(glm::mat4(1.0f), m.size);
-            glm::mat4 moonTransform = base * T * R * S; // 중요!
+
+            glm::vec4 earthCenter = glm::vec4(earth[i].position, 1.0f);
+            glm::mat4 earthMove = glm::translate(glm::mat4(1.0f), glm::vec3(earthCenter));
+
+            glm::mat4 moonTransform = base * earthMove * T * R * S; // 중요!
 
             glUniformMatrix4fv(modelLocation, 1, GL_FALSE, &moonTransform[0][0]);
 
