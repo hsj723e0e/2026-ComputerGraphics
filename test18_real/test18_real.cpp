@@ -67,6 +67,7 @@ float earth_radius = 0.0f;
 float moon_radius = 0.0f;
 bool sungrowing;
 float suncolortime = 0.0f;
+bool is2 = false;
 
 void InitBuffer();
 void drawScene();
@@ -252,7 +253,7 @@ void Move(float dt) {
     float sunSize =  dt;
     Sun_size_animation(sun, sunSize);
 
-    change_Suncolor(dt);
+    if(is2) change_Suncolor(dt);
 }
 
 float Timer() {
@@ -547,6 +548,9 @@ void keyCallback(GLFWwindow* window, int key, int, int action, int mods)
             moon[i].position =
                 glm::normalize(moon[i].position) * (moon_radius + 0.3f);
         }
+    }
+    if (key == GLFW_KEY_2) {
+        is2 = !is2;
     }
 }
 
