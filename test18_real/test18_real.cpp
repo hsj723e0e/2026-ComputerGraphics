@@ -69,7 +69,7 @@ bool sungrowing;
 float suncolortime = 0.0f;
 bool is2 = false;
 bool is3 = false;
-bool is4 = false;
+float moonOrbitangle = 0.0f;
 
 void InitBuffer();
 void drawScene();
@@ -169,18 +169,11 @@ void read_obj_file(const char* filename, Model* model) // 교수님 - OBJ파일 
     fclose(file); // PDF 41쪽: 파일 닫기
 }
 void Moon_orbit(Body& moon, float degrees) {
-    glm::mat4 R;
-    if(is3) R = glm::rotate(glm::mat4(1.0f), glm::radians(degrees), glm::vec3(0.0f, 0.0f, 1.0f));
-    else R = glm::rotate(glm::mat4(1.0f), glm::radians(degrees), glm::vec3(0.0f, 1.0f, 0.0f));
-
+    glm::mat4 R = glm::rotate(glm::mat4(1.0f), glm::radians(degrees), glm::vec3(0.0f, 1.0f, 0.0f));
     // 중앙 y축 공전: 위치와 방향을 함께 회전한다.
     moon.position = glm::vec3(R * glm::vec4(moon.position, 1.0f)); // 위치 바꾸기
 }
 
-void Moon_rotate(Body& moon, float degrees) {
-    glm::mat4 R = glm::rotate(glm::mat4(1.0f), glm::radians(degrees), glm::vec3(0.0f, 0.0f, 1.0f));
-    moon.rotation = glm::mat4(R * moon.rotation);
-}
 void Earth_orbit(Body& earth, float degrees, float tilt_degrees) { // 모델, 이번에 얼마나 회전할지, 
     glm::mat4 tilt = glm::rotate(glm::mat4(1.0f), glm::radians(tilt_degrees), glm::vec3(1.0f, 0.0f, 0.0f));
 
@@ -261,15 +254,13 @@ void Move(float dt) {
     Moon_orbit(moon[1], moondegree);
     Moon_orbit(moon[2], moondegree);
 
-    float sunSize =  dt;
+    float sunSize = dt;
     Sun_size_animation(sun, sunSize);
 
-    if(is2) change_Suncolor(dt);
-
-    if (is4) {
-        Moon_rotate(moon[0], moondegree);
-        Moon_rotate(moon[1], moondegree);
-        Moon_rotate(moon[2], moondegree);
+    if (is2) change_Suncolor(dt);
+    if (is3) {
+        moonOrbitangle += 90.0 * dt;
+        moonOrbitangle = std::fmod(moonOrbitangle, 360.0f);
     }
 }
 
@@ -414,12 +405,10 @@ void drawScene()
     }
 
     // 달의 공전 경로: 각 지구를 중심으로 이동하며 XZ 평면과 평행하다.
-    glm::mat4 orbitRotation = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-
+    glm::mat4 orbitRotation = glm::rotate(glm::mat4(1.0f), glm::radians(moonOrbitangle), glm::vec3(0.0f, 0.0f, 1.0f));
     for (int i = 0; i < 3; ++i) {
         glm::mat4 earthMove = glm::translate(glm::mat4(1.0f), earth[i].position);
-        if(is3) drawOrbit(base * earthMove * orbitRotation, 0.3f + moon_radius);
-        else drawOrbit(base * earthMove , 0.3f + moon_radius);
+        drawOrbit(base * earthMove * orbitRotation, 0.3f + moon_radius);
     }
     if (isM)glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     else  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -485,7 +474,7 @@ void drawScene()
             glm::vec4 earthCenter = glm::vec4(earth[i].position, 1.0f);
             glm::mat4 earthMove = glm::translate(glm::mat4(1.0f), glm::vec3(earthCenter));
 
-            glm::mat4 moonTransform = base * earthMove * T * R * S; // 중요!
+            glm::mat4 moonTransform = base * earthMove * orbitRotation * T * R * S; // 중요!
 
             glUniformMatrix4fv(modelLocation, 1, GL_FALSE, &moonTransform[0][0]);
 
@@ -555,8 +544,8 @@ void keyCallback(GLFWwindow* window, int key, int, int action, int mods)
     if (key == GLFW_KEY_1) {
         float amount = 0.05;
         if (mods & GLFW_MOD_SHIFT) {
-            if(moon_radius > -0.1) moon_radius -= amount;
-            if(earth_radius > -0.7) earth_radius -= amount;
+            if (moon_radius > -0.1) moon_radius -= amount;
+            if (earth_radius > -0.7) earth_radius -= amount;
         }
         else {
             earth_radius += amount;
@@ -574,20 +563,6 @@ void keyCallback(GLFWwindow* window, int key, int, int action, int mods)
     }
     if (key == GLFW_KEY_3) {
         is3 = !is3;
-        float angle;
-        if (is3) {
-            angle = 90.0f;
-        }
-        else {
-            angle = -90.0f;
-        }
-        glm::mat4 R = glm::rotate(glm::mat4(1.0f), glm::radians(angle), glm::vec3(1.0f, 0.0f, 0.0f));
-        for (int i = 0; i < 3; ++i) {
-            moon[i].position = glm::vec3(R * glm::vec4(moon[i].position, 1.0f));
-        }
-    }
-    if (key == GLFW_KEY_4) {
-        is4 = !is4;
     }
 }
 
