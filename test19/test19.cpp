@@ -44,6 +44,8 @@ Body gunBarrel[2];
 Body floorBody;
 glm::vec3 scenePosition(0.0f);
 float sizedy = 0.05f;                 // 배율 증가
+bool isT;
+float midAngleY = 0.0f;
 
 GLfloat* cubePosition = nullptr;
 GLfloat* cubeColor = nullptr;
@@ -382,7 +384,9 @@ void drawScene()
         glm::mat4 T = glm::translate(glm::mat4(1.0f), mb.position);
         glm::mat4 R = mb.rotation;
         glm::mat4 S = glm::scale(glm::mat4(1.0f), mb.size);
-        glm::mat4 mbTransform = base * T * R * S; // 중요!
+        glm::mat4 midRotateY = glm::rotate(glm::mat4(1.0f), glm::radians(midAngleY), glm::vec3(0.0f, 1.0f, 0.0f));
+
+        glm::mat4 mbTransform = base * midRotateY * T * R * S;
 
         glUniformMatrix4fv(modelLocation, 1, GL_FALSE, &mbTransform[0][0]);
 
@@ -413,7 +417,9 @@ void drawScene()
             glm::mat4 T = glm::translate(glm::mat4(1.0f), tb.position);
             glm::mat4 R = tb.rotation;
             glm::mat4 S = glm::scale(glm::mat4(1.0f), tb.size);
-            glm::mat4 tbTransform = base * T * R * S; // 중요!
+            glm::mat4 midRotateY = glm::rotate(glm::mat4(1.0f), glm::radians(midAngleY), glm::vec3(0.0f, 1.0f, 0.0f));
+
+            glm::mat4 tbTransform = base * midRotateY * T * R * S; // 중요!
 
             glUniformMatrix4fv(modelLocation, 1, GL_FALSE, &tbTransform[0][0]);
 
@@ -443,7 +449,9 @@ void drawScene()
             glm::mat4 T = glm::translate(glm::mat4(1.0f), fp.position);
             glm::mat4 R = fp.rotation;
             glm::mat4 S = glm::scale(glm::mat4(1.0f), fp.size);
-            glm::mat4 fpTransform = base * T * R * S;
+            glm::mat4 midRotateY = glm::rotate(glm::mat4(1.0f), glm::radians(midAngleY), glm::vec3(0.0f, 1.0f, 0.0f));
+
+            glm::mat4 fpTransform = base * midRotateY * T * R * S;
 
             glUniformMatrix4fv(modelLocation, 1, GL_FALSE, &fpTransform[0][0]);
 
@@ -470,7 +478,9 @@ void drawScene()
             glm::mat4 T = glm::translate(glm::mat4(1.0f), gb.position);
             glm::mat4 R = gb.rotation;
             glm::mat4 S = glm::scale(glm::mat4(1.0f), gb.size);
-            glm::mat4 gbTransform = base * T * R * S;
+            glm::mat4 midRotateY = glm::rotate(glm::mat4(1.0f), glm::radians(midAngleY), glm::vec3(0.0f, 1.0f, 0.0f));
+
+            glm::mat4 gbTransform = base * midRotateY * T * R * S;
 
             glUniformMatrix4fv(modelLocation, 1, GL_FALSE, &gbTransform[0][0]);
 
@@ -531,5 +541,9 @@ void keyCallback(GLFWwindow* window, int key, int, int action, int)
             gunBarrel[i].position.y += sizedy;
         }
         midBody.position.y += sizedy;
+    } 
+    if (key == GLFW_KEY_T && action == GLFW_PRESS) {
+        midAngleY += 10.0f;
+        
     }
 }
