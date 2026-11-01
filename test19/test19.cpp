@@ -40,6 +40,7 @@ Body midBody;
 Body topBody[2];
 Body flagpole[2];
 Body gunBarrel[2];
+Body floorBody;
 
 GLfloat* cubePosition = nullptr;
 GLfloat* cubeColor = nullptr;
@@ -62,6 +63,10 @@ void Reshape(GLFWwindow* window, int width, int height);
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
 void resetScene() {
+    floorBody = Body{};
+    floorBody.position = glm::vec3(0.0f, -0.05f, 0.0f);
+    floorBody.rotation = glm::mat4(1.0f);
+    floorBody.size = glm::vec3(10.0f, 0.1f, 10.0f);
     for (int i = 0; i < 2; ++i) {
         bottomBody[i] = Body{};
         bottomBody[i].position = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -277,6 +282,28 @@ void drawScene()
 
     glDrawArrays(GL_LINES, 0, 6);
 
+    // 땅
+    {
+        Body& f = floorBody;
+        glm::mat4 T = glm::translate(glm::mat4(1.0f), f.position);
+        glm::mat4 R = f.rotation;
+        glm::mat4 S = glm::scale(glm::mat4(1.0f), f.size);
+        glm::mat4 earthTransform = base * T * R * S; // 중요!
+
+        glUniformMatrix4fv(modelLocation, 1, GL_FALSE, &earthTransform[0][0]);
+
+        glBindBuffer(GL_ARRAY_BUFFER, vbo_pos);
+        glBufferData(GL_ARRAY_BUFFER,
+            cubeVertexCount * 3 * sizeof(GLfloat),
+            cubePosition, GL_DYNAMIC_DRAW);
+
+        glDisableVertexAttribArray(1);
+        glVertexAttrib3f(1, 222.0f / 255.0f, 235.0f / 255.0f, 247.0f / 255.0f);
+
+        glDrawArrays(GL_TRIANGLES, 0, cubeVertexCount);
+
+        glEnableVertexAttribArray(1);
+    }
     // 아래몸체
     {
         for (int i = 0; i < 2; ++i) {
@@ -298,7 +325,7 @@ void drawScene()
                 cubeVertexCount * 3 * sizeof(GLfloat),
                 cubeColor, GL_DYNAMIC_DRAW);
 
-            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+            //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
             glDrawArrays(GL_TRIANGLES, 0, cubeVertexCount);
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         }
