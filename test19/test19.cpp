@@ -381,10 +381,13 @@ void drawScene()
     glm::vec3 cameraTarget = glm::vec3(0.0f +cameraXmove, 0.0f, 0.0 + cameraZmove); //--카메라가 바라보는 기준점
     glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);  //--카메라의 위쪽 방향
 
-    glm::mat4 cameraRotate = glm::rotate(glm::mat4(1.0f), glm::radians(cameraRotateAngle), glm::vec3(0.0f, 1.0f, 0.0f));
+    glm::vec3 selfAxis = glm::normalize(glm::vec3(Rx * Ry * glm::vec4(0.0f, 1.0f, 0.0f, 0.0f)));
+    glm::mat4 cameraRotate = glm::rotate(glm::mat4(1.0f), glm::radians(cameraRotateAngle), selfAxis);
     glm::vec3 direction = cameraTarget - cameraPos;
     direction = glm::vec3(cameraRotate * glm::vec4(direction, 0.0f));
-    cameraTarget = cameraPos + direction;
+    cameraTarget = cameraPos + direction; 
+    cameraUp = glm::vec3(cameraRotate * glm::vec4(cameraUp, 0.0f));
+
 
     glm::vec3 orbitAxis = glm::normalize(glm::vec3(Rx * Ry * glm::vec4(0.0f, 1.0f, 0.0f, 0.0f)));
     glm::mat4 cameraOrbit = glm::rotate(glm::mat4(1.0f), glm::radians(cameraRotateToCenterAngle), orbitAxis);
