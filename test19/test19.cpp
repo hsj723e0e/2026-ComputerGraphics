@@ -46,6 +46,7 @@ glm::vec3 scenePosition(0.0f);
 float sizedy = 0.05f;                 // 배율 증가
 bool isT;
 float midAngleY = 0.0f;
+float midRotateSpeed = 60.0f;
 
 GLfloat* cubePosition = nullptr;
 GLfloat* cubeColor = nullptr;
@@ -61,7 +62,7 @@ GLfloat axisColor[6][3] = {
     { 0.0f, 0.7f, 0.0f },{ 0.0f, 0.7f, 0.0f }, // 초록
     { 0.0f, 0.0f, 1.0f },{ 0.0f, 0.0f, 1.0f }  // 파랑
 };
-
+double lastTime = 0.0;
 void InitBuffer();
 void drawScene();
 void Reshape(GLFWwindow* window, int width, int height);
@@ -183,6 +184,19 @@ void read_obj_file(const char* filename, Model* model) // 교수님 - OBJ파일 
     fclose(file); // PDF 41쪽: 파일 닫기
 }
 
+void Move(float dt) {
+    if (isT) {
+        midAngleY += midRotateSpeed * dt;
+    }
+
+}
+
+float Timer() {
+    double now = glfwGetTime();
+    float dt = static_cast<float>(now - lastTime);
+    lastTime = now;
+    return dt;
+}
 int main()
 {
     if (!glfwInit()) return -1;
@@ -225,9 +239,11 @@ int main()
     Reshape(window, width, height);
 
     while (!glfwWindowShouldClose(window)) {
+        glfwPollEvents();
+        float dt = Timer();
+        Move(dt);
         drawScene();
         glfwSwapBuffers(window);
-        glfwPollEvents();
     }
 
     glDeleteBuffers(1, &vbo_pos);
@@ -509,7 +525,7 @@ void Reshape(GLFWwindow*, int width, int height)
     glViewport((width - size) / 2, (height - size) / 2, size, size);
 }
 
-void keyCallback(GLFWwindow* window, int key, int, int action, int)
+void keyCallback(GLFWwindow* window, int key, int, int action, int mods)
 {
     if (key == GLFW_KEY_Q && action == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, GLFW_TRUE);
@@ -543,7 +559,10 @@ void keyCallback(GLFWwindow* window, int key, int, int action, int)
         midBody.position.y += sizedy;
     } 
     if (key == GLFW_KEY_T && action == GLFW_PRESS) {
-        midAngleY += 10.0f;
-        
+        isT = !isT;
+        if (mods & GLFW_MOD_SHIFT) {
+            midRotateSpeed = -60.0f;
+        }
+        else midRotateSpeed = 60.0f;
     }
 }
