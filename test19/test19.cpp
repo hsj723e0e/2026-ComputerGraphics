@@ -69,13 +69,15 @@ void resetScene() {
     floorBody.rotation = glm::mat4(1.0f);
     floorBody.size = glm::vec3(10.0f, 0.1f, 10.0f);
     floorBody.color = glm::vec3(222.0f / 255.0f, 235.0f / 255.0f, 247.0f / 255.0f);
+
     for (int i = 0; i < 2; ++i) {
         bottomBody[i] = Body{};
-        bottomBody[i].position = glm::vec3(0.0f, 0.0f, 0.0f);
         bottomBody[i].rotation = glm::mat4(1.0f);
-        bottomBody[i].size = glm::vec3(1.0f);
+        bottomBody[i].size = glm::vec3(0.8f, 0.3f, 0.4f);
         bottomBody[i].color = glm::vec3(0.2f, 0.2f, 0.2f);
     }
+    bottomBody[0].position = glm::vec3(-0.23f, 0.05f, 0.0f);
+    bottomBody[1].position = glm::vec3(0.23f, 0.05f, 0.0f);
 
 }
 void read_newline(char* str) // 교수님
