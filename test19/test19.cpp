@@ -637,15 +637,15 @@ void drawScene()
             glm::mat4 gunBarrelRotate; glm::mat4 toCenter; glm::mat4 toOrigin;
             if (i == 0) {
                 gunBarrelRotate = glm::rotate(glm::mat4(1.0f), glm::radians(gunBarrelRotateAngle), glm::vec3(0.0f, 1.0f, 0.0f));
-                toCenter = glm::translate(glm::mat4(1.0f), glm::vec3(0.23f, 0.0f, 0.0f));
-                toOrigin = glm::translate(glm::mat4(1.0f), glm::vec3(-0.23f, 0.0f, 0.0f));
+                toCenter = glm::translate(glm::mat4(1.0f), glm::vec3(-topBody[i].position.x, 0.0f, 0.0f));
+                toOrigin = glm::translate(glm::mat4(1.0f), glm::vec3(topBody[i].position.x, 0.0f, 0.0f));
             }
             else if (i == 1) {
                 gunBarrelRotate = glm::rotate(glm::mat4(1.0f), glm::radians(-gunBarrelRotateAngle), glm::vec3(0.0f, 1.0f, 0.0f));
-                toCenter = glm::translate(glm::mat4(1.0f), glm::vec3(-0.23f, 0.0f, 0.0f));
-                toOrigin = glm::translate(glm::mat4(1.0f), glm::vec3(0.23f, 0.0f, 0.0f));
+                toCenter = glm::translate(glm::mat4(1.0f), glm::vec3(-topBody[i].position.x, 0.0f, 0.0f));
+                toOrigin = glm::translate(glm::mat4(1.0f), glm::vec3(topBody[i].position.x, 0.0f, 0.0f));
             }
-            glm::mat4 gbTransform = base * toOrigin * gunBarrelRotate * toCenter * midRotateY * T * R * S;
+            glm::mat4 gbTransform = base * midRotateY * toOrigin * gunBarrelRotate * toCenter * T * R * S;
 
             glUniformMatrix4fv(modelLocation, 1, GL_FALSE, &gbTransform[0][0]);
 
