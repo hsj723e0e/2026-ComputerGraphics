@@ -292,14 +292,16 @@ void LetsgoOrigin() {
      flagpoleRotateAngle = 0.0f;
      flagpoleRotateSpeed = 30.0f;
      isZ = false;
-     cameraZmove;
-     cameraXmove;
+     cameraZmove = 0.0f;
+     cameraXmove = 0.0f;
      isY = false;
      cameraRotateAngle = 0.0f;
      cameraRotateSpeed = 30.0f;
      isR = false;
     cameraRotateToCenterAngle = 0.0f;
      cameraRotateToCenterSpeed = 30.0f;
+     scenePosition.x = 0.0f, scenePosition.z = 0.0f;
+
 }
 
 int main()
