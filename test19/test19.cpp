@@ -26,13 +26,14 @@ typedef struct { //교수님
     Face* faces;
     size_t face_count;
 } Model;
-typedef struct {
-    Model* model = nullptr;
+Model cube{};
+
+struct Body{
     glm::vec3 position = glm::vec3(0.0f);
     glm::mat4 rotation = glm::mat4(1.0f);
-    float size = 1.0f;
-} Body;
-Model cube{};
+    glm::vec3 size = glm::vec3(1.0f);
+};
+
 
 Body bottomBody[2];  
 Body midBody;
@@ -60,6 +61,15 @@ void drawScene();
 void Reshape(GLFWwindow* window, int width, int height);
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
+void resetScene() {
+    for (int i = 0; i < 2; ++i) {
+        bottomBody[i] = Body{};
+        bottomBody[i].position = glm::vec3(0.0f, 0.0f, 0.0f);
+        bottomBody[i].rotation = glm::mat4(1.0f);
+        bottomBody[i].size = glm::vec3(1.0f);
+    }
+
+}
 void read_newline(char* str) // 교수님
 {
     char* pos = strchr(str, '\n');
@@ -162,7 +172,7 @@ int main()
     read_obj_file("cube.txt", &cube);
     glEnable(GL_DEPTH_TEST);
     InitBuffer();
-
+    resetScene();
     glfwSetFramebufferSizeCallback(window, Reshape);
     glfwSetKeyCallback(window, keyCallback);
     int width, height;
@@ -253,9 +263,10 @@ void drawScene()
     glm::mat4 Rx = glm::rotate(glm::mat4(1.0f), glm::radians(xAngle), glm::vec3(1.0f, 0.0f, 0.0f));
     glm::mat4 Ry = glm::rotate(glm::mat4(1.0f), glm::radians(yAngle), glm::vec3(0.0f, 1.0f, 0.0f));
     glm::mat4 projection = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
-    glm::mat4 modelTransform = projection * Rx * Ry;
-    glUniformMatrix4fv(modelLocation, 1, GL_FALSE, &modelTransform[0][0]);
+    glm::mat4 base = projection * Rx * Ry;
+    glUniformMatrix4fv(modelLocation, 1, GL_FALSE, &base[0][0]);
 
+    // 축
     glBindBuffer(GL_ARRAY_BUFFER, vbo_pos);
     glBufferData(GL_ARRAY_BUFFER,
         sizeof(axisPosition), axisPosition, GL_STATIC_DRAW);
@@ -266,21 +277,32 @@ void drawScene()
 
     glDrawArrays(GL_LINES, 0, 6);
 
-    // 큐브
-    glBindBuffer(GL_ARRAY_BUFFER, vbo_pos);
-    glBufferData(GL_ARRAY_BUFFER,
-        cubeVertexCount * 3 * sizeof(GLfloat),
-        cubePosition, GL_STATIC_DRAW);
+    // 아래몸체
+    {
+        for (int i = 0; i < 2; ++i) {
+            const Body& bb = bottomBody[i];
+            glm::mat4 T = glm::translate(glm::mat4(1.0f), bb.position);
+            glm::mat4 R = bb.rotation;
+            glm::mat4 S = glm::scale(glm::mat4(1.0f), bb.size);
+            glm::mat4 bbTransform = base * T * R * S; // 중요!
 
-    glBindBuffer(GL_ARRAY_BUFFER, vbo_color);
-    glBufferData(GL_ARRAY_BUFFER,
-        cubeVertexCount * 3 * sizeof(GLfloat),
-        cubeColor, GL_STATIC_DRAW);
+            glUniformMatrix4fv(modelLocation, 1, GL_FALSE, &bbTransform[0][0]);
 
-    // 삼각형 구조를 확인하기 위해 선으로 표시
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    glDrawArrays(GL_TRIANGLES, 0, cubeVertexCount);
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+            glBindBuffer(GL_ARRAY_BUFFER, vbo_pos);
+            glBufferData(GL_ARRAY_BUFFER,
+                cubeVertexCount * 3 * sizeof(GLfloat),
+                cubePosition, GL_DYNAMIC_DRAW);
+
+            glBindBuffer(GL_ARRAY_BUFFER, vbo_color);
+            glBufferData(GL_ARRAY_BUFFER,
+                cubeVertexCount * 3 * sizeof(GLfloat),
+                cubeColor, GL_DYNAMIC_DRAW);
+
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+            glDrawArrays(GL_TRIANGLES, 0, cubeVertexCount);
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        }
+    }
 }
 
 void Reshape(GLFWwindow*, int width, int height)
