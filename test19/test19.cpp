@@ -265,9 +265,9 @@ void InitBuffer()
             Vertex vertex = cube.vertices[indices[j]];
             size_t offset = (i * 3 + j) * 3;
 
-            cubePosition[offset] = vertex.x;
-            cubePosition[offset + 1] = vertex.y;
-            cubePosition[offset + 2] = vertex.z;
+            cubePosition[offset] = (vertex.x - 0.5f) * 0.5f;
+            cubePosition[offset + 1] = (vertex.y - 0.5f) * 0.5f;
+            cubePosition[offset + 2] = (vertex.z - 0.5f) * 0.5f;
 
             // 파란색
             cubeColor[offset] = 0.2f;
