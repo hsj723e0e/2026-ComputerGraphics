@@ -52,6 +52,9 @@ float topBodyTransformSpeed = 0.46f;
 bool isG;
 float gunBarrelRotateAngle = 0.0f;
 float gunBarrelRotateSpeed = 30.0f;
+bool isP;
+float flagpoleRotateAngle = 0.0f;
+float flagpoleRotateSpeed = 30.0f;
 
 GLfloat* cubePosition = nullptr;
 GLfloat* cubeColor = nullptr;
@@ -213,7 +216,15 @@ void Move(float dt) {
     if (isG) {
         gunBarrelRotateAngle += gunBarrelRotateSpeed * dt;
     }
-
+    if (isP) {
+        flagpoleRotateAngle += flagpoleRotateSpeed * dt;
+        if (flagpoleRotateAngle >= 30.0f) {
+            flagpoleRotateSpeed = -30.0f;
+        }
+        else if (flagpoleRotateAngle <= -30.0f) {
+            flagpoleRotateSpeed = 30.0f;
+        }
+    }
 }
 
 float Timer() {
@@ -491,8 +502,18 @@ void drawScene()
             glm::mat4 R = fp.rotation;
             glm::mat4 S = glm::scale(glm::mat4(1.0f), fp.size);
             glm::mat4 midRotateY = glm::rotate(glm::mat4(1.0f), glm::radians(midAngleY), glm::vec3(0.0f, 1.0f, 0.0f));
-
-            glm::mat4 fpTransform = base * midRotateY * T * R * S;
+            glm::mat4 flagpoleRotate; glm::mat4 toCenter; glm::mat4 toOrigin;
+            if (i == 0) {
+                flagpoleRotate = glm::rotate(glm::mat4(1.0f), glm::radians(flagpoleRotateAngle), glm::vec3(1.0f, 0.0f, 0.0f));
+                toCenter = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, fp.size.y * 0.5f , 0.0f));
+                toOrigin = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -fp.size.y * 0.5f , 0.0f));
+            }
+            else if (i == 1) {
+                flagpoleRotate = glm::rotate(glm::mat4(1.0f), glm::radians(-flagpoleRotateAngle), glm::vec3(1.0f, 0.0f, 0.0f));
+                toCenter = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, fp.size.y * 0.5f, 0.0f));
+                toOrigin = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -fp.size.y * 0.5f, 0.0f));
+            }
+            glm::mat4 fpTransform = base * midRotateY * T * toOrigin * flagpoleRotate * toCenter * R * S;
 
             glUniformMatrix4fv(modelLocation, 1, GL_FALSE, &fpTransform[0][0]);
 
@@ -611,4 +632,7 @@ void keyCallback(GLFWwindow* window, int key, int, int action, int mods)
         }
         else gunBarrelRotateSpeed = 30.0f;
     }
+    if (key == GLFW_KEY_P && action == GLFW_PRESS) {
+        isP = !isP;
+    } 
 }
