@@ -68,13 +68,13 @@ void resetScene() {
     floorBody = Body{};
     floorBody.position = glm::vec3(0.0f, -0.05f, 0.0f);
     floorBody.rotation = glm::mat4(1.0f);
-    floorBody.size = glm::vec3(10.0f, 0.1f, 10.0f);
+    floorBody.size = glm::vec3(5.0f, 0.05f, 5.0f);
     floorBody.color = glm::vec3(222.0f / 255.0f, 235.0f / 255.0f, 247.0f / 255.0f);
 
     for (int i = 0; i < 2; ++i) {
         bottomBody[i] = Body{};
         bottomBody[i].rotation = glm::mat4(1.0f);
-        bottomBody[i].size = glm::vec3(0.8f, 0.3f, 0.4f);
+        bottomBody[i].size = glm::vec3(0.4f, 0.15f, 0.2f);
         bottomBody[i].color = glm::vec3(0.2f, 0.2f, 0.2f);
     }
     bottomBody[0].position = glm::vec3(-0.23f, 0.05f, 0.0f);
@@ -83,31 +83,31 @@ void resetScene() {
     midBody = Body{};
     midBody.position = glm::vec3(0.0f, 0.1625f, 0.0f);
     midBody.rotation = glm::mat4(1.0f);
-    midBody.size = glm::vec3(1.0f, 0.15f, 0.4f);
+    midBody.size = glm::vec3(0.5f, 0.075f, 0.2f);
     midBody.color = glm::vec3(0.65f, 0.65f, 0.65f);
 
     for (int i = 0; i < 2; ++i) {
         topBody[i] = Body{};
         topBody[i].rotation = glm::mat4(1.0f);
-        topBody[i].size = glm::vec3(0.5f, 0.2f, 0.4f);
+        topBody[i].size = glm::vec3(0.25f, 0.1f, 0.2f);
         topBody[i].color = glm::vec3(0.2f, 0.8f, 0.2f);
     }
     topBody[0].position = glm::vec3(-0.23f, 0.25f, 0.0f);
     topBody[1].position = glm::vec3(0.23f, 0.25f, 0.0f);
 
     for (int i = 0; i < 2; ++i) {
-        // cube.txt의 좌표가 -0.25~0.25이므로 크기 배율의 1/4이 반높이다.
+        // 정점 좌표를 -0.5~0.5로 변환했으므로 size의 절반이 반높이다.
         flagpole[i] = Body{};
         flagpole[i].rotation = glm::mat4(1.0f);
-        flagpole[i].size = glm::vec3(0.04f, 0.36f, 0.04f);
-        flagpole[i].position = topBody[i].position + glm::vec3(0.0f, (topBody[i].size.y + flagpole[i].size.y) * 0.25f, 0.0f);
+        flagpole[i].size = glm::vec3(0.02f, 0.18f, 0.02f);
+        flagpole[i].position = topBody[i].position + glm::vec3(0.0f, (topBody[i].size.y + flagpole[i].size.y) * 0.5f, 0.0f);
         flagpole[i].color = glm::vec3(1.0f, 0.8f, 0.0f);
 
         // 앞쪽은 +Z 방향. 포신 뒷면을 상부 몸체 앞면에 붙인다.
         gunBarrel[i] = Body{};
         gunBarrel[i].rotation = glm::mat4(1.0f);
-        gunBarrel[i].size = glm::vec3(0.03f, 0.03f, 0.32f);
-        gunBarrel[i].position = topBody[i].position + glm::vec3(0.0f, 0.0f, (topBody[i].size.z + gunBarrel[i].size.z) * 0.25f);
+        gunBarrel[i].size = glm::vec3(0.015f, 0.015f, 0.16f);
+        gunBarrel[i].position = topBody[i].position + glm::vec3(0.0f, 0.0f, (topBody[i].size.z + gunBarrel[i].size.z) * 0.5f);
         gunBarrel[i].color = glm::vec3(0.9f, 0.9f, 0.1f);
     }
 
@@ -265,9 +265,9 @@ void InitBuffer()
             Vertex vertex = cube.vertices[indices[j]];
             size_t offset = (i * 3 + j) * 3;
 
-            cubePosition[offset] = (vertex.x - 0.5f) * 0.5f;
-            cubePosition[offset + 1] = (vertex.y - 0.5f) * 0.5f;
-            cubePosition[offset + 2] = (vertex.z - 0.5f) * 0.5f;
+            cubePosition[offset] = (vertex.x - 0.5f);
+            cubePosition[offset + 1] = (vertex.y - 0.5f);
+            cubePosition[offset + 2] = (vertex.z - 0.5f);
 
             // 파란색
             cubeColor[offset] = 0.2f;
