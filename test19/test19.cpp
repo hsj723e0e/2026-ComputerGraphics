@@ -32,6 +32,7 @@ struct Body{
     glm::vec3 position = glm::vec3(0.0f);
     glm::mat4 rotation = glm::mat4(1.0f);
     glm::vec3 size = glm::vec3(1.0f);
+    glm::vec3 color = glm::vec3(1.0f);
 };
 
 
@@ -67,11 +68,13 @@ void resetScene() {
     floorBody.position = glm::vec3(0.0f, -0.05f, 0.0f);
     floorBody.rotation = glm::mat4(1.0f);
     floorBody.size = glm::vec3(10.0f, 0.1f, 10.0f);
+    floorBody.color = glm::vec3(222.0f / 255.0f, 235.0f / 255.0f, 247.0f / 255.0f);
     for (int i = 0; i < 2; ++i) {
         bottomBody[i] = Body{};
         bottomBody[i].position = glm::vec3(0.0f, 0.0f, 0.0f);
         bottomBody[i].rotation = glm::mat4(1.0f);
         bottomBody[i].size = glm::vec3(1.0f);
+        bottomBody[i].color = glm::vec3(0.2f, 0.2f, 0.2f);
     }
 
 }
@@ -298,7 +301,7 @@ void drawScene()
             cubePosition, GL_DYNAMIC_DRAW);
 
         glDisableVertexAttribArray(1);
-        glVertexAttrib3f(1, 222.0f / 255.0f, 235.0f / 255.0f, 247.0f / 255.0f);
+        glVertexAttrib3f(1,f.color.r, f.color.g, f.color.b);
 
         glDrawArrays(GL_TRIANGLES, 0, cubeVertexCount);
 
@@ -325,9 +328,13 @@ void drawScene()
                 cubeVertexCount * 3 * sizeof(GLfloat),
                 cubeColor, GL_DYNAMIC_DRAW);
 
+            glDisableVertexAttribArray(1);
+            glVertexAttrib3f(1, bb.color.r, bb.color.g, bb.color.b);
             //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
             glDrawArrays(GL_TRIANGLES, 0, cubeVertexCount);
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+            glEnableVertexAttribArray(1);
         }
     }
 }
