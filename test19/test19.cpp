@@ -386,10 +386,12 @@ void drawScene()
     direction = glm::vec3(cameraRotate * glm::vec4(direction, 0.0f));
     cameraTarget = cameraPos + direction;
 
-    glm::mat4 cameraOrbit = glm::rotate(glm::mat4(1.0f), glm::radians(cameraRotateToCenterAngle), glm::vec3(0.0f, 1.0f, 0.0f));
+    glm::vec3 orbitAxis = glm::normalize(glm::vec3(Rx * Ry * glm::vec4(0.0f, 1.0f, 0.0f, 0.0f)));
+    glm::mat4 cameraOrbit = glm::rotate(glm::mat4(1.0f), glm::radians(cameraRotateToCenterAngle), orbitAxis);
     cameraPos = glm::vec3(cameraOrbit * glm::vec4(cameraPos, 1.0f));
     cameraTarget = glm::vec3(cameraOrbit * glm::vec4(cameraTarget, 1.0f));
-    
+    cameraUp = glm::vec3(cameraOrbit * glm::vec4(cameraUp, 0.0f));
+
     glm::mat4 view = glm::lookAt(cameraPos, cameraTarget, cameraUp);
 
     glm::mat4 base = projection * view * Rx * Ry * sceneMove;
