@@ -49,6 +49,10 @@ float midAngleY = 0.0f;
 float midRotateSpeed = 60.0f;
 bool isL;
 float topBodyTransformSpeed = 0.46f;
+bool isG;
+float gunBarrelRotateAngle = 0.0f;
+float gunBarrelRotateSpeed = 30.0f;
+
 GLfloat* cubePosition = nullptr;
 GLfloat* cubeColor = nullptr;
 GLsizei cubeVertexCount = 0;
@@ -205,6 +209,9 @@ void Move(float dt) {
             topBodyTransformSpeed = -topBodyTransformSpeed;
 
         }
+    }
+    if (isG) {
+        gunBarrelRotateAngle += gunBarrelRotateSpeed * dt;
     }
 
 }
@@ -514,7 +521,18 @@ void drawScene()
             glm::mat4 S = glm::scale(glm::mat4(1.0f), gb.size);
             glm::mat4 midRotateY = glm::rotate(glm::mat4(1.0f), glm::radians(midAngleY), glm::vec3(0.0f, 1.0f, 0.0f));
 
-            glm::mat4 gbTransform = base * midRotateY * T * R * S;
+            glm::mat4 gunBarrelRotate; glm::mat4 toCenter; glm::mat4 toOrigin;
+            if (i == 0) {
+                gunBarrelRotate = glm::rotate(glm::mat4(1.0f), glm::radians(gunBarrelRotateAngle), glm::vec3(0.0f, 1.0f, 0.0f));
+                toCenter = glm::translate(glm::mat4(1.0f), glm::vec3(0.23f, 0.0f, 0.0f));
+                toOrigin = glm::translate(glm::mat4(1.0f), glm::vec3(-0.23f, 0.0f, 0.0f));
+            }
+            else if (i == 1) {
+                gunBarrelRotate = glm::rotate(glm::mat4(1.0f), glm::radians(-gunBarrelRotateAngle), glm::vec3(0.0f, 1.0f, 0.0f));
+                toCenter = glm::translate(glm::mat4(1.0f), glm::vec3(-0.23f, 0.0f, 0.0f));
+                toOrigin = glm::translate(glm::mat4(1.0f), glm::vec3(0.23f, 0.0f, 0.0f));
+            }
+            glm::mat4 gbTransform = base * toOrigin * gunBarrelRotate * toCenter * midRotateY * T * R * S;
 
             glUniformMatrix4fv(modelLocation, 1, GL_FALSE, &gbTransform[0][0]);
 
@@ -585,5 +603,12 @@ void keyCallback(GLFWwindow* window, int key, int, int action, int mods)
     }
     if (key == GLFW_KEY_L && action == GLFW_PRESS) {
         isL = true;
+    }
+    if (key == GLFW_KEY_G && action == GLFW_PRESS) {
+        isG = !isG;
+        if (mods & GLFW_MOD_SHIFT) {
+            gunBarrelRotateSpeed = -30.0f;
+        }
+        else gunBarrelRotateSpeed = 30.0f;
     }
 }
