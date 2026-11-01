@@ -28,7 +28,7 @@ typedef struct { //교수님
 } Model;
 Model cube{};
 
-struct Body{
+struct Body {
     glm::vec3 position = glm::vec3(0.0f);
     glm::mat4 rotation = glm::mat4(1.0f);
     glm::vec3 size = glm::vec3(1.0f);
@@ -36,7 +36,7 @@ struct Body{
 };
 
 
-Body bottomBody[2];  
+Body bottomBody[2];
 Body midBody;
 Body topBody[2];
 Body flagpole[2];
@@ -80,9 +80,9 @@ void resetScene() {
     bottomBody[1].position = glm::vec3(0.23f, 0.05f, 0.0f);
 
     midBody = Body{};
-    midBody.position = glm::vec3(0.0f, 0.1625f, 0.0f);
+    midBody.position = glm::vec3(0.0f, 0.185f, 0.0f);
     midBody.rotation = glm::mat4(1.0f);
-    midBody.size = glm::vec3(1.0f, 0.15f, 0.4f);
+    midBody.size = glm::vec3(1.0f, 0.2f, 0.4f);
     midBody.color = glm::vec3(0.65f, 0.65f, 0.65f);
 
     for (int i = 0; i < 2; ++i) {
@@ -91,23 +91,23 @@ void resetScene() {
         topBody[i].size = glm::vec3(0.5f, 0.2f, 0.4f);
         topBody[i].color = glm::vec3(0.2f, 0.8f, 0.2f);
     }
-    topBody[0].position = glm::vec3(-0.23f, 0.25f, 0.0f);
-    topBody[1].position = glm::vec3(0.23f, 0.25f, 0.0f);
+    topBody[0].position = glm::vec3(-0.23f, 0.3f, 0.0f);
+    topBody[1].position = glm::vec3(0.23f, 0.3f, 0.0f);
 
     for (int i = 0; i < 2; ++i) {
-        // cube.txt의 좌표가 -0.25~0.25이므로 크기 배율의 1/4이 반높이다.
         flagpole[i] = Body{};
         flagpole[i].rotation = glm::mat4(1.0f);
         flagpole[i].size = glm::vec3(0.04f, 0.36f, 0.04f);
-        flagpole[i].position = topBody[i].position + glm::vec3( 0.0f, (topBody[i].size.y + flagpole[i].size.y) * 0.25f, 0.0f);
+        flagpole[i].position = topBody[i].position + glm::vec3(0.0f, 0.2f, 0.0f);
         flagpole[i].color = glm::vec3(1.0f, 0.8f, 0.0f);
+    }
 
-        // 앞쪽은 +Z 방향. 포신 뒷면을 상부 몸체 앞면에 붙인다.
+    for (int i = 0; i < 2; ++i) {
         gunBarrel[i] = Body{};
-        gunBarrel[i].rotation = glm::mat4(1.0f);
-        gunBarrel[i].size = glm::vec3(0.04f, 0.04f, 0.32f);
-        gunBarrel[i].position = topBody[i].position + glm::vec3(0.0f, 0.0f, (topBody[i].size.z + gunBarrel[i].size.z) * 0.25f);
-        gunBarrel[i].color = glm::vec3(0.9f, 0.9f, 0.1f);
+        gunBarrel[i].rotation = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        gunBarrel[i].size = glm::vec3(0.02f, 0.36f, 0.02f);
+        gunBarrel[i].position = topBody[i].position + glm::vec3(0.0f, 0.1f, 0.1f);
+        gunBarrel[i].color = glm::vec3(1.0f, 0.8f, 0.0f);
     }
 
 }
@@ -235,7 +235,7 @@ int main()
     free(cubePosition);
     free(cubeColor);
     glfwDestroyWindow(window);
-    glfwTerminate();    
+    glfwTerminate();
     return 0;
 }
 
@@ -334,7 +334,7 @@ void drawScene()
             cubePosition, GL_DYNAMIC_DRAW);
 
         glDisableVertexAttribArray(1);
-        glVertexAttrib3f(1,f.color.r, f.color.g, f.color.b);
+        glVertexAttrib3f(1, f.color.r, f.color.g, f.color.b);
 
         glDrawArrays(GL_TRIANGLES, 0, cubeVertexCount);
 
@@ -437,7 +437,7 @@ void drawScene()
             glm::mat4 T = glm::translate(glm::mat4(1.0f), fp.position);
             glm::mat4 R = fp.rotation;
             glm::mat4 S = glm::scale(glm::mat4(1.0f), fp.size);
-            glm::mat4 fpTransform = base * T * R * S;
+            glm::mat4 fpTransform = base * T * R * S; // 중요!
 
             glUniformMatrix4fv(modelLocation, 1, GL_FALSE, &fpTransform[0][0]);
 
@@ -453,7 +453,10 @@ void drawScene()
 
             glDisableVertexAttribArray(1);
             glVertexAttrib3f(1, fp.color.r, fp.color.g, fp.color.b);
+            //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
             glDrawArrays(GL_TRIANGLES, 0, cubeVertexCount);
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
             glEnableVertexAttribArray(1);
         }
     }
@@ -464,7 +467,13 @@ void drawScene()
             glm::mat4 T = glm::translate(glm::mat4(1.0f), gb.position);
             glm::mat4 R = gb.rotation;
             glm::mat4 S = glm::scale(glm::mat4(1.0f), gb.size);
-            glm::mat4 gbTransform = base * T * R * S;
+
+            float halfHeight = gb.size.y * 0.25f;
+            glm::mat4 toCenter = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, halfHeight, 0.0f));
+
+            glm::mat4 toOrigin = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -halfHeight, 0.0f));
+
+            glm::mat4 gbTransform = base * T * toOrigin * R * toCenter * S; // 중요!
 
             glUniformMatrix4fv(modelLocation, 1, GL_FALSE, &gbTransform[0][0]);
 
@@ -480,10 +489,14 @@ void drawScene()
 
             glDisableVertexAttribArray(1);
             glVertexAttrib3f(1, gb.color.r, gb.color.g, gb.color.b);
+            //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
             glDrawArrays(GL_TRIANGLES, 0, cubeVertexCount);
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
             glEnableVertexAttribArray(1);
         }
     }
+
 }
 
 void Reshape(GLFWwindow*, int width, int height)
