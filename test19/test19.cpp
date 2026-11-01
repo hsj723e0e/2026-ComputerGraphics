@@ -42,6 +42,7 @@ Body topBody[2];
 Body flagpole[2];
 Body gunBarrel[2];
 Body floorBody;
+glm::vec3 scenePosition(0.0f);
 
 GLfloat* cubePosition = nullptr;
 GLfloat* cubeColor = nullptr;
@@ -105,7 +106,7 @@ void resetScene() {
         // 앞쪽은 +Z 방향. 포신 뒷면을 상부 몸체 앞면에 붙인다.
         gunBarrel[i] = Body{};
         gunBarrel[i].rotation = glm::mat4(1.0f);
-        gunBarrel[i].size = glm::vec3(0.04f, 0.04f, 0.32f);
+        gunBarrel[i].size = glm::vec3(0.03f, 0.03f, 0.32f);
         gunBarrel[i].position = topBody[i].position + glm::vec3(0.0f, 0.0f, (topBody[i].size.z + gunBarrel[i].size.z) * 0.25f);
         gunBarrel[i].color = glm::vec3(0.9f, 0.9f, 0.1f);
     }
@@ -304,8 +305,12 @@ void drawScene()
     glm::mat4 Rx = glm::rotate(glm::mat4(1.0f), glm::radians(xAngle), glm::vec3(1.0f, 0.0f, 0.0f));
     glm::mat4 Ry = glm::rotate(glm::mat4(1.0f), glm::radians(yAngle), glm::vec3(0.0f, 1.0f, 0.0f));
     glm::mat4 projection = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
-    glm::mat4 base = projection * Rx * Ry;
-    glUniformMatrix4fv(modelLocation, 1, GL_FALSE, &base[0][0]);
+
+    glm::mat4 sceneMove = glm::translate(glm::mat4(1.0f), scenePosition);
+
+    glm::mat4 base = projection * Rx * Ry * sceneMove;
+    glm::mat4 axisTransform = projection * Rx * Ry;
+    glUniformMatrix4fv(modelLocation, 1, GL_FALSE, &axisTransform[0][0]);
 
     // 축
     glBindBuffer(GL_ARRAY_BUFFER, vbo_pos);
@@ -324,9 +329,9 @@ void drawScene()
         glm::mat4 T = glm::translate(glm::mat4(1.0f), f.position);
         glm::mat4 R = f.rotation;
         glm::mat4 S = glm::scale(glm::mat4(1.0f), f.size);
-        glm::mat4 earthTransform = base * T * R * S; // 중요!
+        glm::mat4 floorTransform = axisTransform * T * R * S; // 중요!
 
-        glUniformMatrix4fv(modelLocation, 1, GL_FALSE, &earthTransform[0][0]);
+        glUniformMatrix4fv(modelLocation, 1, GL_FALSE, &floorTransform[0][0]);
 
         glBindBuffer(GL_ARRAY_BUFFER, vbo_pos);
         glBufferData(GL_ARRAY_BUFFER,
@@ -497,5 +502,20 @@ void keyCallback(GLFWwindow* window, int key, int, int action, int)
 {
     if (key == GLFW_KEY_Q && action == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, GLFW_TRUE);
+    }
+    if (key == GLFW_KEY_RIGHT && action == GLFW_PRESS) {
+        scenePosition.x += 0.05f;
+        return;
+    }
+    if (key == GLFW_KEY_LEFT && action == GLFW_PRESS) {
+        scenePosition.x -= 0.05f;
+        return;
+    }
+    if (key == GLFW_KEY_UP && action == GLFW_PRESS) {
+        scenePosition.z -= 0.05f;
+        return;
+    }
+    if (key == GLFW_KEY_DOWN && action == GLFW_PRESS) {
+        scenePosition.z += 0.05f;
     }
 }
