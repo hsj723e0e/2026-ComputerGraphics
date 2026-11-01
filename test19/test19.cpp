@@ -6,6 +6,9 @@
 #include <gl/glm/glm.hpp>
 #include <gl/glm/gtc/matrix_transform.hpp>
 #include "shader.h"
+#include <random>
+std::random_device dre;
+std::mt19937 gen(dre());
 
 GLuint vao, vbo_pos, vbo_color;
 GLint modelLocation;
@@ -36,11 +39,11 @@ struct Body {
 };
 
 
-Body bottomBody[2];
-Body midBody;
-Body topBody[2];
-Body flagpole[2];
-Body gunBarrel[2];
+Body bottomBody[2], originbottomBody[2];
+Body midBody, originmidBody;
+Body topBody[2], origintopBody[2];
+Body flagpole[2], originflagpole[2];
+Body gunBarrel[2], origingunBarrel[2];
 Body floorBody;
 glm::vec3 scenePosition(0.0f);
 float sizedy = 0.05f;                 // 배율 증가
@@ -131,6 +134,14 @@ void resetScene() {
         gunBarrel[i].position = topBody[i].position + glm::vec3(0.0f, 0.0f, (topBody[i].size.z + gunBarrel[i].size.z) * 0.5f);
         gunBarrel[i].color = glm::vec3(0.9f, 0.9f, 0.1f);
     }
+
+    for (int i = 0; i < 2; ++i) {
+        originbottomBody[i] = bottomBody[i];
+        origintopBody[i] = topBody[i];
+        originflagpole[i] = flagpole[i];
+        origingunBarrel[i] = gunBarrel[i];
+    }
+    originmidBody = midBody;
 
 }
 void read_newline(char* str) // 교수님
@@ -248,6 +259,49 @@ float Timer() {
     lastTime = now;
     return dt;
 }
+
+void changeColor() {
+    std::uniform_real_distribution<float> color(0.0f, 1.0f);
+    for (int i = 0; i < 2; ++i) {
+        bottomBody[i].color = glm::vec3(color(dre), color(dre), color(dre));
+        topBody[i].color = glm::vec3(color(dre), color(dre), color(dre));
+        flagpole[i].color = glm::vec3(color(dre), color(dre), color(dre));
+        gunBarrel[i].color = glm::vec3(color(dre), color(dre), color(dre));
+    }
+    midBody.color = glm::vec3(color(dre), color(dre), color(dre));
+}
+
+void LetsgoOrigin() {
+    for (int i = 0; i < 2; ++i) {
+        bottomBody[i] = originbottomBody[i];
+        topBody[i] = origintopBody[i];
+        flagpole[i] = originflagpole[i];
+        gunBarrel[i] = origingunBarrel[i];
+    }
+    midBody = originmidBody;
+     sizedy = 0.05f;                 // 배율 증가
+     isT = false;
+     midAngleY = 0.0f;
+     midRotateSpeed = 60.0f;
+     isL = false;
+     topBodyTransformSpeed = 0.46f;
+     isG = false;
+     gunBarrelRotateAngle = 0.0f;
+     gunBarrelRotateSpeed = 30.0f;
+     isP = false;
+     flagpoleRotateAngle = 0.0f;
+     flagpoleRotateSpeed = 30.0f;
+     isZ = false;
+     cameraZmove;
+     cameraXmove;
+     isY = false;
+     cameraRotateAngle = 0.0f;
+     cameraRotateSpeed = 30.0f;
+     isR = false;
+    cameraRotateToCenterAngle = 0.0f;
+     cameraRotateToCenterSpeed = 30.0f;
+}
+
 int main()
 {
     if (!glfwInit()) return -1;
@@ -698,5 +752,11 @@ void keyCallback(GLFWwindow* window, int key, int, int action, int mods)
             cameraRotateToCenterSpeed = 30.0f;
         }
         else cameraRotateToCenterSpeed = -30.0f;
+    }
+    if (key == GLFW_KEY_O && action == GLFW_PRESS) {
+        changeColor();
+    }
+    if (key == GLFW_KEY_C && action == GLFW_PRESS) {
+        LetsgoOrigin();
     }
 }
