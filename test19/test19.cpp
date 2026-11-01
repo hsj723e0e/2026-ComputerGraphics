@@ -47,7 +47,8 @@ float sizedy = 0.05f;                 // 배율 증가
 bool isT;
 float midAngleY = 0.0f;
 float midRotateSpeed = 60.0f;
-
+bool isL;
+float topBodyTransformSpeed = 0.46f;
 GLfloat* cubePosition = nullptr;
 GLfloat* cubeColor = nullptr;
 GLsizei cubeVertexCount = 0;
@@ -187,6 +188,23 @@ void read_obj_file(const char* filename, Model* model) // 교수님 - OBJ파일 
 void Move(float dt) {
     if (isT) {
         midAngleY += midRotateSpeed * dt;
+    }
+    if (isL) {
+        topBody[0].position.x += topBodyTransformSpeed * dt;
+        topBody[1].position.x -= topBodyTransformSpeed * dt;
+        flagpole[0].position.x += topBodyTransformSpeed * dt;
+        flagpole[1].position.x -= topBodyTransformSpeed * dt;
+        gunBarrel[0].position.x += topBodyTransformSpeed * dt;
+        gunBarrel[1].position.x -= topBodyTransformSpeed * dt;
+        if (topBody[0].position.x >= 0.23f) {
+            isL = false;
+            topBodyTransformSpeed = -topBodyTransformSpeed;
+        }
+        else if (topBody[0].position.x <= -0.23f) {
+            isL = false;
+            topBodyTransformSpeed = -topBodyTransformSpeed;
+
+        }
     }
 
 }
@@ -564,5 +582,8 @@ void keyCallback(GLFWwindow* window, int key, int, int action, int mods)
             midRotateSpeed = -60.0f;
         }
         else midRotateSpeed = 60.0f;
+    }
+    if (key == GLFW_KEY_L && action == GLFW_PRESS) {
+        isL = true;
     }
 }
