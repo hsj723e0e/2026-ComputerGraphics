@@ -56,6 +56,8 @@ bool isP;
 float flagpoleRotateAngle = 0.0f;
 float flagpoleRotateSpeed = 30.0f;
 bool isZ;
+float cameraZmove;
+float cameraXmove;
 
 GLfloat* cubePosition = nullptr;
 GLfloat* cubeColor = nullptr;
@@ -363,8 +365,8 @@ void drawScene()
     glm::mat4 projection = glm::perspective(glm::radians(45.0f), 1.0f, 0.1f, 100.0f);
     glm::mat4 sceneMove = glm::translate(glm::mat4(1.0f), scenePosition);
 
-    glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 2.0f); //--카메라 위치 
-    glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f); //--카메라가 바라보는 기준점
+    glm::vec3 cameraPos = glm::vec3(0.0f + cameraXmove , 0.0f, 2.0 + cameraZmove); //--카메라 위치 
+    glm::vec3 cameraTarget = glm::vec3(0.0f + cameraXmove, 0.0f, 0.0 + cameraZmove); //--카메라가 바라보는 기준점
     glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);  //--카메라의 위쪽 방향
     glm::mat4 view = glm::lookAt(cameraPos, cameraTarget, cameraUp);
 
@@ -640,7 +642,16 @@ void keyCallback(GLFWwindow* window, int key, int, int action, int mods)
     if (key == GLFW_KEY_P && action == GLFW_PRESS) {
         isP = !isP;
     } 
+    if (key == GLFW_KEY_X && action == GLFW_PRESS) {
+        if (mods & GLFW_MOD_SHIFT) {
+            cameraXmove -= 0.1f;
+        }
+        else cameraXmove += 0.1f;
+    }
     if (key == GLFW_KEY_Z && action == GLFW_PRESS) {
-        isZ = !isZ;
+        if (mods & GLFW_MOD_SHIFT) {
+            cameraZmove -= 0.1f;
+        }
+        else cameraZmove += 0.1f;
     }
 }
