@@ -43,6 +43,7 @@ Body flagpole[2];
 Body gunBarrel[2];
 Body floorBody;
 glm::vec3 scenePosition(0.0f);
+float sizedy = 0.05f;                 // 배율 증가
 
 GLfloat* cubePosition = nullptr;
 GLfloat* cubeColor = nullptr;
@@ -517,5 +518,18 @@ void keyCallback(GLFWwindow* window, int key, int, int action, int)
     }
     if (key == GLFW_KEY_DOWN && action == GLFW_PRESS) {
         scenePosition.z += 0.05f;
+    }
+    if (key == GLFW_KEY_D && action == GLFW_PRESS) {
+        if (bottomBody[0].size.y > 0.4) sizedy = -0.03f;
+        else if (bottomBody[0].size.y < 0.05) sizedy = 0.03f;
+        for (int i = 0; i < 2; ++i) {
+            bottomBody[i].size.y += sizedy; // 배율증가량임
+
+            bottomBody[i].position.y += sizedy * 0.5;
+            topBody[i].position.y += sizedy;
+            flagpole[i].position.y += sizedy;
+            gunBarrel[i].position.y += sizedy;
+        }
+        midBody.position.y += sizedy;
     }
 }
