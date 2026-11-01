@@ -80,10 +80,20 @@ void resetScene() {
     bottomBody[1].position = glm::vec3(0.23f, 0.05f, 0.0f);
 
     midBody = Body{};
-    midBody.position = glm::vec3(0.0f, 0.135f, 0.0f);
+    midBody.position = glm::vec3(0.0f, 0.185f, 0.0f);
     midBody.rotation = glm::mat4(1.0f);
-    midBody.size = glm::vec3(1.0f, 0.04f, 0.4f);
+    midBody.size = glm::vec3(1.0f, 0.2f, 0.4f);
     midBody.color = glm::vec3(0.65f, 0.65f, 0.65f);
+
+    for (int i = 0; i < 2; ++i) {
+        topBody[i] = Body{};
+        topBody[i].rotation = glm::mat4(1.0f);
+        topBody[i].size = glm::vec3(0.5f, 0.2f, 0.4f);
+        topBody[i].color = glm::vec3(0.2f, 0.8f, 0.2f);
+    }
+    topBody[0].position = glm::vec3(-0.23f, 0.3f, 0.0f);
+    topBody[1].position = glm::vec3(0.23f, 0.3f, 0.0f);
+
 
 }
 void read_newline(char* str) // 교수님
@@ -367,10 +377,43 @@ void drawScene()
 
         glDisableVertexAttribArray(1);
         glVertexAttrib3f(1, mb.color.r, mb.color.g, mb.color.b);
+
+        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         glDrawArrays(GL_TRIANGLES, 0, cubeVertexCount);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
         glEnableVertexAttribArray(1);
 
+    }
+    // 상부몸체
+    {
+        for (int i = 0; i < 2; ++i) {
+            const Body& tb = topBody[i];
+            glm::mat4 T = glm::translate(glm::mat4(1.0f), tb.position);
+            glm::mat4 R = tb.rotation;
+            glm::mat4 S = glm::scale(glm::mat4(1.0f), tb.size);
+            glm::mat4 tbTransform = base * T * R * S; // 중요!
+
+            glUniformMatrix4fv(modelLocation, 1, GL_FALSE, &tbTransform[0][0]);
+
+            glBindBuffer(GL_ARRAY_BUFFER, vbo_pos);
+            glBufferData(GL_ARRAY_BUFFER,
+                cubeVertexCount * 3 * sizeof(GLfloat),
+                cubePosition, GL_DYNAMIC_DRAW);
+
+            glBindBuffer(GL_ARRAY_BUFFER, vbo_color);
+            glBufferData(GL_ARRAY_BUFFER,
+                cubeVertexCount * 3 * sizeof(GLfloat),
+                cubeColor, GL_DYNAMIC_DRAW);
+
+            glDisableVertexAttribArray(1);
+            glVertexAttrib3f(1, tb.color.r, tb.color.g, tb.color.b);
+            //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+            glDrawArrays(GL_TRIANGLES, 0, cubeVertexCount);
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+            glEnableVertexAttribArray(1);
+        }
     }
 }
 
