@@ -94,6 +94,23 @@ void resetScene() {
     topBody[0].position = glm::vec3(-0.23f, 0.3f, 0.0f);
     topBody[1].position = glm::vec3(0.23f, 0.3f, 0.0f);
 
+    for (int i = 0; i < 2; ++i) {
+        // cube.txt의 좌표가 -0.25~0.25이므로 크기 배율의 1/4이 반높이다.
+        flagpole[i] = Body{};
+        flagpole[i].rotation = glm::mat4(1.0f);
+        flagpole[i].size = glm::vec3(0.05f, 0.5f, 0.05f);
+        flagpole[i].position = topBody[i].position + glm::vec3(
+            0.0f, (topBody[i].size.y + flagpole[i].size.y) * 0.25f, 0.0f);
+        flagpole[i].color = glm::vec3(1.0f, 0.8f, 0.0f);
+
+        // 앞쪽은 +Z 방향. 포신 뒷면을 상부 몸체 앞면에 붙인다.
+        gunBarrel[i] = Body{};
+        gunBarrel[i].rotation = glm::mat4(1.0f);
+        gunBarrel[i].size = glm::vec3(0.05f, 0.05f, 0.4f);
+        gunBarrel[i].position = topBody[i].position + glm::vec3(
+            0.0f, 0.0f, (topBody[i].size.z + gunBarrel[i].size.z) * 0.25f);
+        gunBarrel[i].color = glm::vec3(0.9f, 0.9f, 0.1f);
+    }
 
 }
 void read_newline(char* str) // 교수님
@@ -412,6 +429,60 @@ void drawScene()
             glDrawArrays(GL_TRIANGLES, 0, cubeVertexCount);
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
+            glEnableVertexAttribArray(1);
+        }
+    }
+    // 깃대
+    {
+        for (int i = 0; i < 2; ++i) {
+            const Body& fp = flagpole[i];
+            glm::mat4 T = glm::translate(glm::mat4(1.0f), fp.position);
+            glm::mat4 R = fp.rotation;
+            glm::mat4 S = glm::scale(glm::mat4(1.0f), fp.size);
+            glm::mat4 fpTransform = base * T * R * S;
+
+            glUniformMatrix4fv(modelLocation, 1, GL_FALSE, &fpTransform[0][0]);
+
+            glBindBuffer(GL_ARRAY_BUFFER, vbo_pos);
+            glBufferData(GL_ARRAY_BUFFER,
+                cubeVertexCount * 3 * sizeof(GLfloat),
+                cubePosition, GL_DYNAMIC_DRAW);
+
+            glBindBuffer(GL_ARRAY_BUFFER, vbo_color);
+            glBufferData(GL_ARRAY_BUFFER,
+                cubeVertexCount * 3 * sizeof(GLfloat),
+                cubeColor, GL_DYNAMIC_DRAW);
+
+            glDisableVertexAttribArray(1);
+            glVertexAttrib3f(1, fp.color.r, fp.color.g, fp.color.b);
+            glDrawArrays(GL_TRIANGLES, 0, cubeVertexCount);
+            glEnableVertexAttribArray(1);
+        }
+    }
+    // 포신
+    {
+        for (int i = 0; i < 2; ++i) {
+            const Body& gb = gunBarrel[i];
+            glm::mat4 T = glm::translate(glm::mat4(1.0f), gb.position);
+            glm::mat4 R = gb.rotation;
+            glm::mat4 S = glm::scale(glm::mat4(1.0f), gb.size);
+            glm::mat4 gbTransform = base * T * R * S;
+
+            glUniformMatrix4fv(modelLocation, 1, GL_FALSE, &gbTransform[0][0]);
+
+            glBindBuffer(GL_ARRAY_BUFFER, vbo_pos);
+            glBufferData(GL_ARRAY_BUFFER,
+                cubeVertexCount * 3 * sizeof(GLfloat),
+                cubePosition, GL_DYNAMIC_DRAW);
+
+            glBindBuffer(GL_ARRAY_BUFFER, vbo_color);
+            glBufferData(GL_ARRAY_BUFFER,
+                cubeVertexCount * 3 * sizeof(GLfloat),
+                cubeColor, GL_DYNAMIC_DRAW);
+
+            glDisableVertexAttribArray(1);
+            glVertexAttrib3f(1, gb.color.r, gb.color.g, gb.color.b);
+            glDrawArrays(GL_TRIANGLES, 0, cubeVertexCount);
             glEnableVertexAttribArray(1);
         }
     }
