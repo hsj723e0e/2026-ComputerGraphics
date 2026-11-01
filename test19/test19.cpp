@@ -61,6 +61,9 @@ float cameraXmove;
 bool isY;
 float cameraRotateAngle;
 float cameraRotateSpeed = 30.0f;
+bool isR;
+float cameraRotateToCenterAngle;
+float cameraRotateToCenterSpeed = 30.0f;
 
 GLfloat* cubePosition = nullptr;
 GLfloat* cubeColor = nullptr;
@@ -234,6 +237,9 @@ void Move(float dt) {
     if (isY) {
         cameraRotateAngle += cameraRotateSpeed * dt;
     }
+    if (isR) {
+        cameraRotateToCenterAngle += cameraRotateToCenterSpeed * dt;
+    }
 }
 
 float Timer() {
@@ -372,13 +378,18 @@ void drawScene()
     glm::mat4 sceneMove = glm::translate(glm::mat4(1.0f), scenePosition);
 
     glm::vec3 cameraPos = glm::vec3(0.0f + cameraXmove , 0.0f, 2.0 + cameraZmove); //--카메라 위치 
-    glm::vec3 cameraTarget = glm::vec3(0.0f + cameraXmove, 0.0f, 0.0 + cameraZmove); //--카메라가 바라보는 기준점
+    glm::vec3 cameraTarget = glm::vec3(0.0f +cameraXmove, 0.0f, 0.0 + cameraZmove); //--카메라가 바라보는 기준점
     glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);  //--카메라의 위쪽 방향
+
     glm::mat4 cameraRotate = glm::rotate(glm::mat4(1.0f), glm::radians(cameraRotateAngle), glm::vec3(0.0f, 1.0f, 0.0f));
     glm::vec3 direction = cameraTarget - cameraPos;
-
     direction = glm::vec3(cameraRotate * glm::vec4(direction, 0.0f));
     cameraTarget = cameraPos + direction;
+
+    glm::mat4 cameraOrbit = glm::rotate(glm::mat4(1.0f), glm::radians(cameraRotateToCenterAngle), glm::vec3(0.0f, 1.0f, 0.0f));
+    cameraPos = glm::vec3(cameraOrbit * glm::vec4(cameraPos, 1.0f));
+    cameraTarget = glm::vec3(cameraOrbit * glm::vec4(cameraTarget, 1.0f));
+    
     glm::mat4 view = glm::lookAt(cameraPos, cameraTarget, cameraUp);
 
     glm::mat4 base = projection * view * Rx * Ry * sceneMove;
@@ -671,5 +682,12 @@ void keyCallback(GLFWwindow* window, int key, int, int action, int mods)
             cameraRotateSpeed = 30.0f;
         }
         else cameraRotateSpeed = -30.0f;
+    }
+    if (key == GLFW_KEY_R && action == GLFW_PRESS) {
+        isR = !isR;
+        if (mods & GLFW_MOD_SHIFT) {
+            cameraRotateToCenterSpeed = 30.0f;
+        }
+        else cameraRotateToCenterSpeed = -30.0f;
     }
 }
