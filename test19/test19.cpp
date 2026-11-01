@@ -79,6 +79,12 @@ void resetScene() {
     bottomBody[0].position = glm::vec3(-0.23f, 0.05f, 0.0f);
     bottomBody[1].position = glm::vec3(0.23f, 0.05f, 0.0f);
 
+    midBody = Body{};
+    midBody.position = glm::vec3(0.0f, 0.135f, 0.0f);
+    midBody.rotation = glm::mat4(1.0f);
+    midBody.size = glm::vec3(1.0f, 0.04f, 0.4f);
+    midBody.color = glm::vec3(0.65f, 0.65f, 0.65f);
+
 }
 void read_newline(char* str) // 교수님
 {
@@ -338,6 +344,33 @@ void drawScene()
 
             glEnableVertexAttribArray(1);
         }
+    }
+    // 중앙몸체
+    {
+        const Body& mb = midBody;
+        glm::mat4 T = glm::translate(glm::mat4(1.0f), mb.position);
+        glm::mat4 R = mb.rotation;
+        glm::mat4 S = glm::scale(glm::mat4(1.0f), mb.size);
+        glm::mat4 mbTransform = base * T * R * S; // 중요!
+
+        glUniformMatrix4fv(modelLocation, 1, GL_FALSE, &mbTransform[0][0]);
+
+        glBindBuffer(GL_ARRAY_BUFFER, vbo_pos);
+        glBufferData(GL_ARRAY_BUFFER,
+            cubeVertexCount * 3 * sizeof(GLfloat),
+            cubePosition, GL_DYNAMIC_DRAW);
+
+        glBindBuffer(GL_ARRAY_BUFFER, vbo_color);
+        glBufferData(GL_ARRAY_BUFFER,
+            cubeVertexCount * 3 * sizeof(GLfloat),
+            cubeColor, GL_DYNAMIC_DRAW);
+
+        glDisableVertexAttribArray(1);
+        glVertexAttrib3f(1, mb.color.r, mb.color.g, mb.color.b);
+        glDrawArrays(GL_TRIANGLES, 0, cubeVertexCount);
+
+        glEnableVertexAttribArray(1);
+
     }
 }
 
