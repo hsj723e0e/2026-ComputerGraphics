@@ -7,6 +7,8 @@
 #include <gl/glm/gtc/matrix_transform.hpp>
 #include "shader.h"
 #include <cmath>
+#include <iostream>
+using namespace std;
 
 GLuint vao, vbo_pos, vbo_color;
 GLint modelLocation;
@@ -425,12 +427,12 @@ void drawScene()
     glBindVertexArray(vao);
 
     glm::mat4 projection = glm::perspective(glm::radians(45.0f), 1.0f, 0.1f, 100.0f);
-    glm::vec3 cameraPos(0.0f, 0.0f, 7.0f);
+    glm::vec3 cameraPos(0.0f, 0.0f, 7.0f + sceneZ);
     glm::vec3 cameraTarget(0.0f, 0.0f, 0.0f);
     glm::vec3 cameraUp(0.0f, 1.0f, 0.0f);
     glm::mat4 view = glm::lookAt(cameraPos, cameraTarget, cameraUp);
 
-    glm::mat4 sceneMove = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, sceneZ));
+    glm::mat4 sceneMove = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
     glm::mat4 Ry = glm::rotate(glm::mat4(1.0f), glm::radians(sceneAngleY), glm::vec3(0.0f, 1.0f, 0.0f));
     glm::mat4 Rz = glm::rotate(glm::mat4(1.0f), glm::radians(roomAngleZ), glm::vec3(0.0f, 0.0f, 1.0f));
     glm::mat4 base = projection * view * sceneMove * Ry * Rz;
@@ -565,26 +567,28 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     }
 }
 
-void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
+void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) //버튼을 누르거나 놓으면
 {
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
         isDragging = true;
         double mouseY;
         glfwGetCursorPos(window, &lastMouseX, &mouseY);
+        cout << lastMouseX << endl;
     }
     else if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
         isDragging = false;
     }
 }
 
-void cursorPosCallback(GLFWwindow* window, double xpos, double ypos)
+void cursorPosCallback(GLFWwindow* window, double xpos, double ypos) // 커서가 움직이면
 {
+    cout << xpos << " " << ypos << endl;
     // 창 밖에서 버튼을 놓았을 때도 다음 이동에 방이 끌려가지 않게 한다.
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE)
         isDragging = false;
     if (isDragging) {
         float dx = static_cast<float>(xpos - lastMouseX);
-        roomAngleZ -= dx * 0.35f;
+        roomAngleZ += dx * 0.35f;
         // 바닥이 뒤집히지 않는 범위에서 기울인다.
         if (roomAngleZ > 60.0f) roomAngleZ = 60.0f;
         else if (roomAngleZ < -60.0f) roomAngleZ = -60.0f;
