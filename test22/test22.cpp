@@ -212,6 +212,14 @@ void read_obj_file(const char* filename, Model* model) // 교수님 - OBJ파일 
     fclose(file); // PDF 41쪽: 파일 닫기
 }
 
+void framebuffer_size_callback(GLFWwindow*, int width, int height)
+{
+    // 창 크기가 바뀌어도 좌표계의 비율을 유지한다.
+    //int size = width < height ? width : height;
+    //glViewport((width - size) / 2, (height - size) / 2, size, size);
+    glViewport(0, 0, width / 2, height);
+}
+
 void Move(float dt) {
     if (isT) {
         midAngleY += midRotateSpeed * dt;
@@ -311,7 +319,7 @@ int main()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow* window = glfwCreateWindow(800, 800, "Test 18 Real - XYZ Axes", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(2500, 1500, "Test 18 Real - XYZ Axes", nullptr, nullptr);
     if (!window) {
         glfwTerminate();
         return -1;
@@ -339,11 +347,11 @@ int main()
     glEnable(GL_DEPTH_TEST);
     InitBuffer();
     resetScene();
-    glfwSetFramebufferSizeCallback(window, Reshape);
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwSetKeyCallback(window, keyCallback);
     int width, height;
     glfwGetFramebufferSize(window, &width, &height);
-    Reshape(window, width, height);
+    framebuffer_size_callback(window, width, height);
 
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
@@ -352,7 +360,6 @@ int main()
         drawScene();
         glfwSwapBuffers(window);
     }
-
     glDeleteBuffers(1, &vbo_pos);
     glDeleteBuffers(1, &vbo_color);
     glDeleteVertexArrays(1, &vao);
@@ -667,13 +674,6 @@ void drawScene()
             glEnableVertexAttribArray(1);
         }
     }
-}
-
-void Reshape(GLFWwindow*, int width, int height)
-{
-    // 창 크기가 바뀌어도 좌표계의 비율을 유지한다.
-    int size = width < height ? width : height;
-    glViewport((width - size) / 2, (height - size) / 2, size, size);
 }
 
 void keyCallback(GLFWwindow* window, int key, int, int action, int mods)
