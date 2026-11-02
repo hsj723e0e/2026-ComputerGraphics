@@ -449,6 +449,7 @@ void drawScene(int viewportMode, float aspect )
     // 기울어진 바닥의 Z축을 따라 이동한다. 방향 벡터이므로 w는 0이다.
     glm::vec3 cameraZoffset = glm::vec3(
         Rx * Ry * glm::vec4(0.0f, 0.0f, cameraZmove, 0.0f));
+    if(viewportMode == 2 || viewportMode == 3)cameraZoffset = glm::vec3(glm::vec4(0.0f, 0.0f, cameraZmove, 0.0f));
     glm::vec3 cameraPos;
     glm::vec3 cameraTarget = glm::vec3(cameraXmove, 0.0f, 0.0f) + cameraZoffset; //--카메라가 바라보는 기준점
     glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);  //--카메라의 위쪽 방향
@@ -466,6 +467,7 @@ void drawScene(int viewportMode, float aspect )
         cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
     }
     glm::vec3 selfAxis = glm::normalize(glm::vec3(Rx * Ry * glm::vec4(0.0f, 1.0f, 0.0f, 0.0f)));
+    if (viewportMode == 2 || viewportMode == 3)selfAxis = glm::normalize(glm::vec3(glm::vec4(0.0f, 1.0f, 0.0f, 0.0f)));
     glm::mat4 cameraRotate = glm::rotate(glm::mat4(1.0f), glm::radians(cameraRotateAngle), selfAxis);
     glm::vec3 direction = cameraTarget - cameraPos;
     direction = glm::vec3(cameraRotate * glm::vec4(direction, 0.0f));
@@ -473,6 +475,7 @@ void drawScene(int viewportMode, float aspect )
     cameraUp = glm::vec3(cameraRotate * glm::vec4(cameraUp, 0.0f));
 
     glm::vec3 orbitAxis = glm::normalize(glm::vec3(Rx * Ry * glm::vec4(0.0f, 1.0f, 0.0f, 0.0f)));
+    if (viewportMode == 2 || viewportMode == 3)orbitAxis = glm::normalize(glm::vec3(glm::vec4(0.0f, 1.0f, 0.0f, 0.0f)));
     glm::mat4 cameraOrbit = glm::rotate(glm::mat4(1.0f), glm::radians(cameraRotateToCenterAngle), orbitAxis);
     cameraPos = glm::vec3(cameraOrbit * glm::vec4(cameraPos, 1.0f));
     cameraTarget = glm::vec3(cameraOrbit * glm::vec4(cameraTarget, 1.0f));
