@@ -357,6 +357,14 @@ int main()
         glfwPollEvents();
         float dt = Timer();
         Move(dt);
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        glViewport(0, 0, width / 2, height);
+        drawScene();
+        glViewport(width /2 , height / 2, width / 2, height / 2);
+        drawScene();
+        glViewport(width/ 2, 0, width / 2, height / 2);
         drawScene();
         glfwSwapBuffers(window);
     }
@@ -429,8 +437,6 @@ void InitBuffer()
 
 void drawScene()
 {
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glUseProgram(shaderProgramID);
     glBindVertexArray(vao);
 
