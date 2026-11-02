@@ -450,18 +450,21 @@ void drawScene(int viewportMode, float aspect )
     glm::vec3 cameraZoffset = glm::vec3(
         Rx * Ry * glm::vec4(0.0f, 0.0f, cameraZmove, 0.0f));
     glm::vec3 cameraPos;
+    glm::vec3 cameraTarget = glm::vec3(cameraXmove, 0.0f, 0.0f) + cameraZoffset; //--카메라가 바라보는 기준점
+    glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);  //--카메라의 위쪽 방향
     if (viewportMode == 1) {
         cameraPos = glm::vec3(cameraXmove, 0.0f, 2.0f) + cameraZoffset;
     }
-    else if (viewportMode == 2) {
-        cameraPos = glm::vec3(cameraXmove, 5.0f, 2.0f) + cameraZoffset;
+    if (viewportMode == 2) {
+        cameraPos = glm::vec3(cameraXmove, 5.0f, 0.0f) + cameraZoffset;
+        projection = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 10.0f);
+        cameraUp = glm::vec3(0.0f, 0.0f, -1.0f);
     }
-    else if (viewportMode == 3) {
+    if (viewportMode == 3) {
         cameraPos = glm::vec3(cameraXmove, 0.0f, 2.0f) + cameraZoffset;
+        projection = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 10.0f);
+        cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
     }
-    glm::vec3 cameraTarget = glm::vec3(cameraXmove, 0.0f, 0.0f) + cameraZoffset; //--카메라가 바라보는 기준점
-    glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);  //--카메라의 위쪽 방향
-
     glm::vec3 selfAxis = glm::normalize(glm::vec3(Rx * Ry * glm::vec4(0.0f, 1.0f, 0.0f, 0.0f)));
     glm::mat4 cameraRotate = glm::rotate(glm::mat4(1.0f), glm::radians(cameraRotateAngle), selfAxis);
     glm::vec3 direction = cameraTarget - cameraPos;
@@ -479,7 +482,10 @@ void drawScene(int viewportMode, float aspect )
 
     glm::mat4 base = projection * view * Rx * Ry * sceneMove;
     glm::mat4 axisTransform = projection * view * Rx * Ry;
-
+    if (viewportMode == 2) {
+        base = projection * view * sceneMove;
+        axisTransform = projection * view ;
+    }
     if (viewportMode == 3) {
         base = projection * view * sceneMove;
         axisTransform = projection * view;
