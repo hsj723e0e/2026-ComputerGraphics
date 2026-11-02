@@ -84,7 +84,7 @@ GLfloat axisColor[6][3] = {
 };
 double lastTime = 0.0;
 void InitBuffer();
-void drawScene();
+void drawScene(int viewportMode, float aspect);
 void Reshape(GLFWwindow* window, int width, int height);
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
@@ -361,11 +361,11 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glViewport(0, 0, width / 2, height);
-        drawScene();
+        drawScene(1, (width/2) / height);
         glViewport(width /2 , height / 2, width / 2, height / 2);
-        drawScene();
+        drawScene(2, (width / 2) / (height / 2) );
         glViewport(width/ 2, 0, width / 2, height / 2);
-        drawScene();
+        drawScene(3, (width / 2) / (height / 2));
         glfwSwapBuffers(window);
     }
     glDeleteBuffers(1, &vbo_pos);
@@ -435,7 +435,7 @@ void InitBuffer()
     glEnableVertexAttribArray(1);
 }
 
-void drawScene()
+void drawScene(int viewportMode, float aspect )
 {
     glUseProgram(shaderProgramID);
     glBindVertexArray(vao);
@@ -449,8 +449,16 @@ void drawScene()
     // 기울어진 바닥의 Z축을 따라 이동한다. 방향 벡터이므로 w는 0이다.
     glm::vec3 cameraZoffset = glm::vec3(
         Rx * Ry * glm::vec4(0.0f, 0.0f, cameraZmove, 0.0f));
-
-    glm::vec3 cameraPos = glm::vec3(cameraXmove, 0.0f, 2.0f) + cameraZoffset; //--카메라 위치
+    glm::vec3 cameraPos;
+    if (viewportMode == 1) {
+        cameraPos = glm::vec3(cameraXmove, 0.0f, 2.0f) + cameraZoffset;
+    }
+    else if (viewportMode == 2) {
+        cameraPos = glm::vec3(cameraXmove, 5.0f, 2.0f) + cameraZoffset;
+    }
+    else if (viewportMode == 3) {
+        cameraPos = glm::vec3(cameraXmove, 0.0f, 2.0f) + cameraZoffset;
+    }
     glm::vec3 cameraTarget = glm::vec3(cameraXmove, 0.0f, 0.0f) + cameraZoffset; //--카메라가 바라보는 기준점
     glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);  //--카메라의 위쪽 방향
 
@@ -460,7 +468,6 @@ void drawScene()
     direction = glm::vec3(cameraRotate * glm::vec4(direction, 0.0f));
     cameraTarget = cameraPos + direction;
     cameraUp = glm::vec3(cameraRotate * glm::vec4(cameraUp, 0.0f));
-
 
     glm::vec3 orbitAxis = glm::normalize(glm::vec3(Rx * Ry * glm::vec4(0.0f, 1.0f, 0.0f, 0.0f)));
     glm::mat4 cameraOrbit = glm::rotate(glm::mat4(1.0f), glm::radians(cameraRotateToCenterAngle), orbitAxis);
@@ -472,6 +479,11 @@ void drawScene()
 
     glm::mat4 base = projection * view * Rx * Ry * sceneMove;
     glm::mat4 axisTransform = projection * view * Rx * Ry;
+
+    if (viewportMode == 3) {
+        base = projection * view * sceneMove;
+        axisTransform = projection * view;
+    }
     glUniformMatrix4fv(modelLocation, 1, GL_FALSE, &axisTransform[0][0]);
 
     // 축
