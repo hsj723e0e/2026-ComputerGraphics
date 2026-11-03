@@ -41,7 +41,6 @@ Body boxBody[3];       // 바닥의 육면체 3개
 Body ballBody[5];      // 공은 최대 5개
 
 glm::vec3 ballSpeed[5];
-float boxSpeed[3]{};
 int ballCount = 1;     // 실행하면 공 1개가 튕긴다. B키로 최대 5개까지 추가한다.
 
 const float roomHalfWidth = 1.5f;
@@ -126,7 +125,7 @@ void resetScene() {
     for (int i = 0; i < 3; ++i) {
         boxBody[i] = Body{};
         boxBody[i].color = glm::vec3(0.93f, 0.18f, 0.14f);
-        boxSpeed[i] = 0.0f;
+        boxVelocity[i] = glm::vec3(0.0f);
     }
     boxBody[0].size = glm::vec3(0.30f, 0.30f, 0.30f);
     boxBody[1].size = glm::vec3(0.38f, 0.42f, 0.38f);
@@ -265,33 +264,34 @@ void Move(float dt) {
 
     for (int i = 0; i < 3; ++i) {
         Body& b = boxBody[i];
+        // 월드의 아래 방향 중력을 기울어진 방 좌표로 변환한다.
+        float angle = glm::radians(roomAngleZ);
+        glm::vec3 gravity(-9.8f * std::sin(angle), -9.8f * std::cos(angle), 0.0f);
+        boxVelocity[i] += gravity * dt;
+        b.position += boxVelocity[i] * dt;
+
         float floorY = -roomHalfHeight + b.size.y * 0.5f;
-        if (floorOpenAngle == 0.0f && b.position.y < floorY ) {
-            // 방을 기울이면 바닥의 낮은 쪽으로 육면체가 미끄러진다.
-            // Z축 회전각이 +이면 왼쪽, -이면 오른쪽으로 이동한다.
-            float speedX = -1.2f * std::sin(glm::radians(roomAngleZ));
-            b.position.x += speedX * dt;
-            //b.position.y = -roomHalfHeight + b.size.y * 0.5f;
-            //if (b.position.y > -roomHalfHeight + b.size.y * 0.5f) {
-            //    b.position.y += boxSpeed[i] * dt;
-            //}
-            float angle = glm::radians(roomAngleZ);
-
-            glm::vec3 gravity(-9.8f * std::sin(angle), -9.8f * std::cos(angle), 0.0f);
-            boxVelocity[i] += gravity * dt;
-
-            b.position += boxVelocity[i] * dt;
-            boxSpeed[i] = 0.0f;
-
-            if (b.position.x + b.size.x * 0.5f > roomHalfWidth)
-                b.position.x = roomHalfWidth - b.size.x * 0.5f;
-            else if (b.position.x - b.size.x * 0.5f < -roomHalfWidth)
-                b.position.x = -roomHalfWidth + b.size.x * 0.5f;
+        if (floorOpenAngle == 0.0f && b.position.y < floorY) {
+            b.position.y = floorY;
+            if (boxVelocity[i].y < 0.0f) boxVelocity[i].y = 0.0f;
         }
-        else {
-            // 열린 바닥 아래로 떨어진다. boxSpeed는 낙하 속도이다.
-            boxSpeed[i] -= 2.0f * dt;
-            b.position.y += boxSpeed[i] * dt;
+
+        // 방을 뒤집었을 때는 천장이 상자를 받친다.
+        float ceilingY = roomHalfHeight - b.size.y * 0.5f;
+        if (b.position.y > ceilingY) {
+            b.position.y = ceilingY;
+            if (boxVelocity[i].y > 0.0f) boxVelocity[i].y = 0.0f;
+        }
+
+        float leftX = -roomHalfWidth + b.size.x * 0.5f;
+        float rightX = roomHalfWidth - b.size.x * 0.5f;
+        if (b.position.x < leftX) {
+            b.position.x = leftX;
+            if (boxVelocity[i].x < 0.0f) boxVelocity[i].x = 0.0f;
+        }
+        else if (b.position.x > rightX) {
+            b.position.x = rightX;
+            if (boxVelocity[i].x > 0.0f) boxVelocity[i].x = 0.0f;
         }
     }
 }
