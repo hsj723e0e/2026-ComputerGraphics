@@ -432,7 +432,7 @@ void drawScene() {
     glm::mat4 view = glm::lookAt(cameraPos,cameraTarget,cameraUp);
     glm::mat4 base = projection * view;
 
-    // 바닥
+    // 바닥q
     {
         const Body& f = floorBody;
         glm::mat4 T = glm::translate(glm::mat4(1.0f), f.position);

@@ -68,7 +68,7 @@ GLsizei cubeVertexCount = 0;
 GLfloat* spherePosition = nullptr;
 GLfloat* sphereColor = nullptr;
 GLsizei sphereVertexCount = 0;
-
+glm::vec3 boxVelocity[3]{};
 // XY 평면. 반시계 방향으로 정점을 연결하므로 앞면은 +Z를 바라본다.
 // 각 벽을 회전시켜 앞면이 방 안쪽을 바라보게 한다.
 GLfloat planePosition[6][3] = {
@@ -217,6 +217,7 @@ void read_obj_file(const char* filename, Model* model) // 교수님 - OBJ파일 
 
 void Move(float dt) {
     // 바닥 열림 상태가 켜지면 양쪽 바닥이 아래로 90도 열린다.
+
     if (isFloorOpen && floorOpenAngle < 90.0f) {
         floorOpenAngle += 90.0f * dt;
         if (floorOpenAngle > 90.0f) floorOpenAngle = 90.0f;
@@ -264,12 +265,22 @@ void Move(float dt) {
 
     for (int i = 0; i < 3; ++i) {
         Body& b = boxBody[i];
-        if (floorOpenAngle == 0.0f) {
+        float floorY = -roomHalfHeight + b.size.y * 0.5f;
+        if (floorOpenAngle == 0.0f && b.position.y < floorY ) {
             // 방을 기울이면 바닥의 낮은 쪽으로 육면체가 미끄러진다.
             // Z축 회전각이 +이면 왼쪽, -이면 오른쪽으로 이동한다.
             float speedX = -1.2f * std::sin(glm::radians(roomAngleZ));
             b.position.x += speedX * dt;
-            b.position.y = -roomHalfHeight + b.size.y * 0.5f;
+            //b.position.y = -roomHalfHeight + b.size.y * 0.5f;
+            //if (b.position.y > -roomHalfHeight + b.size.y * 0.5f) {
+            //    b.position.y += boxSpeed[i] * dt;
+            //}
+            float angle = glm::radians(roomAngleZ);
+
+            glm::vec3 gravity(-9.8f * std::sin(angle), -9.8f * std::cos(angle), 0.0f);
+            boxVelocity[i] += gravity * dt;
+
+            b.position += boxVelocity[i] * dt;
             boxSpeed[i] = 0.0f;
 
             if (b.position.x + b.size.x * 0.5f > roomHalfWidth)
@@ -590,8 +601,6 @@ void cursorPosCallback(GLFWwindow* window, double xpos, double ypos) // 커서�
         float dx = static_cast<float>(xpos - lastMouseX);
         roomAngleZ += dx * 0.35f;
         // 바닥이 뒤집히지 않는 범위에서 기울인다.
-        if (roomAngleZ > 60.0f) roomAngleZ = 60.0f;
-        else if (roomAngleZ < -60.0f) roomAngleZ = -60.0f;
     }
     lastMouseX = xpos;
 }
