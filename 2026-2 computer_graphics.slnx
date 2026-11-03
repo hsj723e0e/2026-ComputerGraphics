@@ -21,5 +21,6 @@
   <Project Path="test20/test20.vcxproj" Id="6a1f7dd6-8c1d-4b55-b745-2f3f015f20dc" />
   <Project Path="test21/test21.vcxproj" Id="1e403f11-a5d7-4ac5-99b8-deee388c5771" />
   <Project Path="test22/test22.vcxproj" Id="aae6913a-2c72-412f-af7f-9b02a4dd0101" />
+  <Project Path="test23/test23.vcxproj" Id="a427e8de-2bcb-4500-a2b8-ec6754b714bc" />
 </Solution>
 
